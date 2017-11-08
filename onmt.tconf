@@ -12,8 +12,15 @@ global {
   bpe_operations=49500
 
   njobs=50
+  email="" # set your own email address so we can email you about the jobs
+
   resource_flags="-l 'mem_free=2g,ram_free=2g'"
-  action_flags="-m ae -M dings@jhu.edu"
+  bigmem_resource_flags="-l 'mem_free=16g,ram_free=16g'"
+  gpu_resource_flags="-l 'hostname=c*,gpu=1,mem_free=12g,ram_free=12g'"
+  bigmem_gpu_resource_flags="-l 'hostname=c*,gpu=1,mem_free=12g,ram_free=12g'"
+
+  action_flags="-m ae -M $email"
+  gpu_action_flags="-m ae -M $email -q g.q"
 
   train_data=(
     side:

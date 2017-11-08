@@ -254,23 +254,11 @@ task truecase : mosesdecoder
   $mosesdecoder/scripts/recaser/truecase.perl -model $model < $in > $out
 }
 
-# task train_bpe : subword_nmt
-#     < src_in=$out@truecase[DataSection:train,side:src]
-#     < trg_in=$out@truecase[DataSection:train,side:trg]
-#     > out 
-#     :: .submitter="sge" .action_flags=$action_flags .resource_flags=$resource_flags
-#     :: bpe_operations=@
-#     :: SRC=@ 
-#     :: TRG=@ {
-# 
-#   cat $src_in $trg_in | $subword_nmt/learn_bpe.py -s $bpe_operations > $out
-# }
-
 task train_bpe : subword_nmt
       < src_in=$out@truecase[DataSection:train,side:src]
       < trg_in=$out@truecase[DataSection:train,side:trg]
       > out
-      :: .submitter="sge" .action_flags=$action_flags .resource_flags="-l 'mem_free=16g,ram_free=16g'"
+      :: .submitter="sge" .action_flags=$action_flags .resource_flags=$bigmem_resource_flags
       :: bpe_operations=@
       :: SRC=@ 
       :: TRG=@ {
@@ -293,7 +281,7 @@ task binarize_data : onmt
     < dev_src_in=$out@apply_bpe[DataSection:dev]
     < dev_trg_in=$out@apply_bpe[DataSection:dev,side:trg]
     > out
-    :: .submitter="sge" .action_flags=$action_flags .resource_flags="-l 'mem_free=24g,ram_free=24g'" {
+    :: .submitter="sge" .action_flags=$action_flags .resource_flags=$bigmem_resource_flags {
 
   source /home/shuoyangd/pyenv/py3/bin/activate
   python $onmt/preprocess.py -train_src $train_src_in -train_tgt $train_trg_in -valid_src $dev_src_in -valid_tgt $dev_trg_in -save_data $out 
@@ -307,8 +295,8 @@ task train : onmt
     < in=$out@binarize_data
     > out
     :: .submitter="sge" 
-    :: .action_flags="-m ae -M dings@jhu.edu -q g.q"
-    :: .resource_flags="-l 'hostname=c*,gpu=1,mem_free=12g,ram_free=12g'"
+    :: .action_flags=$gpu_action_flags
+    :: .resource_flags=$bigmem_gpu_resource_flags
     :: train_train_from=@
     :: train_train_from_state_dict=@
     :: train_start_epoch=@
@@ -412,8 +400,8 @@ task decode : onmt
     < model=$out@model_selection
     > out
     :: .submitter="sge" 
-    :: .action_flags="-m ae -M dings@jhu.edu -q g.q"
-    :: .resource_flags="-l 'hostname=c*,gpu=1'" {
+    :: .action_flags=$gpu_action_flags
+    :: .resource_flags=$gpu_resource_flags {
 
   source /home/shuoyangd/pyenv/py3/bin/activate
   export n_gpus=`lspci | grep -i "nvidia" | wc -l`
