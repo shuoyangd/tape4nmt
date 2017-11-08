@@ -14,7 +14,7 @@
 
 Face the truth: MT researchers are dealing with pipeline, even we are having a end-to-end system. For example, this is a minimalistic NMT system building pipeline with BPE:
 
-![Minimalistic Workflow]()
+![Minimalistic Workflow](https://raw.githubusercontent.com/shuoyangd/tape4nmt/master/workflow.png)
 
 Doing this by hand, from my own experiences in several evaluation campaigns, is very error-prone and inefficient. Hence the need for a experiment management system.
 
