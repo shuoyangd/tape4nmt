@@ -5,19 +5,15 @@ package onmt
   git checkout -b working $realref
 }
 
-package subword_nmt :: .versioner=disk .path="/home/shuoyangd/nmt/subword-nmt" {
+package subword_nmt :: .versioner=disk .path="https://github.com/rsennrich/subword-nmt" {
 
 }
 
-package mosesdecoder :: .versioner=disk .path="/export/b11/shuoyangd/mosesstd" {
+package mosesdecoder :: .versioner=disk .path="https://github.com/moses-smt/mosesdecoder" {
 
 }
 
 package stanford_seg :: .versioner=disk .path="/home/shuoyangd/stanford-seg" {
-
-}
-
-package fasttext :: .versioner=disk .path="/export/b18/shuoyangd/projects/nmt-source-mono/fastText" {
 
 }
 
@@ -491,7 +487,7 @@ task nist_bleu : mosesdecoder
 }
 
 task multi_bleu : mosesdecoder
-    < in=$out@detruecase
+    < in=$out@detokenize
     < ref=$out@devtest_tokenize[side:trg]
     > bleu
     > bleu_c 
@@ -502,8 +498,8 @@ task multi_bleu : mosesdecoder
     mv $ref ${ref}.tmp # get rid of dummy single reference
   fi
 
-  $mosesdecoder/scripts/generic/multi-bleu.perl $ref < $in > $bleu_c
-  $mosesdecoder/scripts/generic/multi-bleu.perl -lc $ref < $in > $bleu
+  $mosesdecoder/scripts/generic/multi-bleu-detok.perl $ref < $in > $bleu_c
+  $mosesdecoder/scripts/generic/multi-bleu-detok.perl -lc $ref < $in > $bleu
 
   if [ $refn -gt 1 ] ; then 
     mv ${ref}.tmp $ref
