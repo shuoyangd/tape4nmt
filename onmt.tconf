@@ -2,6 +2,7 @@ global {
   
   # GLOBAL/PREPROCESSING CONFIGURATIONS
   working_dir="/export/b18/shuoyangd/projects/tape4nmt"
+  pyenv="" # if you have virtualenv environment, add them here
 
   SRC=zh
   TRG=en
@@ -70,5 +71,9 @@ global {
   train_encoder_type="brnn"
 
   # TEST CONFIGURATIONS
-  test_model_selection_strategy="ppl"
+  test_model_selection_strategy="acc"
+  test_max_sent_length="150"
+  test_beam_size="12"
+  test_batch_size="1"
+  test_replace_unk="true"
 }

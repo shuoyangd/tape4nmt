@@ -67,7 +67,7 @@ task devtest_text_from_sgm : mosesdecoder
   if [ ! -z $sgm_devtest ] ; then
     $mosesdecoder/scripts/ems/support/reference-from-sgm.perl $trg_in $wrap_template $trg_out
   else
-    cp $src_in $src_out
+    cp $trg_in $trg_out
   fi
 
   refn=`ls $trg_out* | wc -l`
@@ -210,7 +210,7 @@ task devtest_tokenize : stanford_seg mosesdecoder
     fi
 
     touch $in # recover cheat
-    touch $out # cheat
+    cp ${out}.ref0 $out # everthing following this would be single reference
     
   fi
 }
@@ -281,12 +281,15 @@ task binarize_data : onmt
     < dev_src_in=$out@apply_bpe[DataSection:dev]
     < dev_trg_in=$out@apply_bpe[DataSection:dev,side:trg]
     > out
-    :: .submitter="sge" .action_flags=$action_flags .resource_flags=$bigmem_resource_flags {
+    :: .submitter="sge" .action_flags=$action_flags .resource_flags=$bigmem_resource_flags
+    :: pyenv=@ {
 
-  source /home/shuoyangd/pyenv/py3/bin/activate
+  if [ ! -z $pyenv ] ; then
+    source ${pyenv}/bin/activate
+  fi
   python $onmt/preprocess.py -train_src $train_src_in -train_tgt $train_trg_in -valid_src $dev_src_in -valid_tgt $dev_trg_in -save_data $out 
 
-  if [ -f ${out}.train.pt ] ; then
+  if [ -f ${out}.train.1.pt ] ; then
     touch $out
   fi
 }
@@ -297,6 +300,7 @@ task train : onmt
     :: .submitter="sge" 
     :: .action_flags=$gpu_action_flags
     :: .resource_flags=$bigmem_gpu_resource_flags
+    :: pyenv=@
     :: train_train_from=@
     :: train_train_from_state_dict=@
     :: train_start_epoch=@
@@ -310,7 +314,9 @@ task train : onmt
     :: train_learning_rate=@
     :: train_encoder_type=@ {
 
-  source /home/shuoyangd/pyenv/py3/bin/activate
+  if [ ! -z $pyenv ] ; then
+    source ${pyenv}/bin/activate
+  fi
   export n_gpus=`lspci | grep -i "nvidia" | wc -l`
   export device=`nvidia-smi | sed -e '1,/Processes/d' | tail -n+3 | head -n-1 | perl -ne 'next unless /^\|\s+(\d)\s+\d+/; $a{$1}++; for(my $i=0;$i<$ENV{"n_gpus"};$i++) { if (!defined($a{$i})) { print $i."\n"; last; }}' | tail -n 1`
   echo "gpu$device at "`hostname`
@@ -395,27 +401,42 @@ task model_selection
 # the target input here is used to compute naïve acc and ppl,
 # that's why we need post-bpe target input
 task decode : onmt
-    < src_in=$out@apply_bpe[DataSection:devtest]
+    < src_in=$out@apply_bpe[DataSection:devtest,side:src]
     < trg_in=$out@apply_bpe[DataSection:devtest,side:trg]
     < model=$out@model_selection
     > out
+    :: test_max_sent_length=@
+    :: test_beam_size=@
+    :: test_batch_size=@
+    :: test_replace_unk=@
     :: .submitter="sge" 
-    :: .action_flags=$gpu_action_flags
-    :: .resource_flags=$gpu_resource_flags {
+    :: .action_flags="-m ae -M dings@jhu.edu -q g.q"
+    :: .resource_flags="-l 'hostname=c*,gpu=1'"
+    :: pyenv=@ {
 
-  source /home/shuoyangd/pyenv/py3/bin/activate
+  if [ ! -z $pyenv ] ; then
+    source ${pyenv}/bin/activate
+  fi
+
   export n_gpus=`lspci | grep -i "nvidia" | wc -l`
   export device=`nvidia-smi | sed -e '1,/Processes/d' | tail -n+3 | head -n-1 | perl -ne 'next unless /^\|\s+(\d)\s+\d+/; $a{$1}++; for(my $i=0;$i<$ENV{"n_gpus"};$i++) { if (!defined($a{$i})) { print $i."\n"; last; }}' | tail -n 1`
   echo $device
   refn=`ls $trg_in* | wc -l`
 
   if [ $refn -eq 1 ]; then
-#     python $onmt/translate.py -gpu $device -model $model -src $src_in -tgt $trg_in -replace_unk -verbose -output $out
-    python $onmt/translate.py -gpu $device -model $model -src $src_in -replace_unk -verbose -output $out -batch_size 1 -beam_size 12
+    cmd="python $onmt/translate.py -gpu $device -model $model -src $src_in -tgt $trg_in -replace_unk -verbose -output $out -batch_size 1 -beam_size 12"
+    # cmd="python $onmt/translate.py -gpu $device -model $model -src $src_in -verbose -output $out -batch_size $test_batch_size -beam_size $test_beam_size -max_sent_length $test_max_sent_length"
   else
-#     python $onmt/translate.py -gpu $device -model $model -src $src_in -tgt $trg_in0 -replace_unk -verbose -output $out
-    python $onmt/translate.py -gpu $device -model $model -src $src_in -replace_unk -verbose -output $out -batch_size 1 -beam_size 12
+    cmd="python $onmt/translate.py -gpu $device -model $model -src $src_in -tgt $trg_in0 -replace_unk -verbose -output $out -batch_size 1 -beam_size 12"
+    # cmd="python $onmt/translate.py -gpu $device -model $model -src $src_in -verbose -output $out -batch_size $test_batch_size -beam_size $test_beam_size -max_sent_length $test_max_sent_length"
   fi
+
+  if [ ! -z $test_replace_unk ]; then
+    cmd=$cmd" -replace_unk"
+  fi
+
+  echo $cmd
+  $cmd
 }
 
 task debpe 
@@ -478,14 +499,14 @@ task multi_bleu : mosesdecoder
 
   refn=`ls $ref* | wc -l`
   if [ $refn -gt 1 ] ; then 
-    rm $ref # get rid of cheat
+    mv $ref ${ref}.tmp # get rid of dummy single reference
   fi
 
   $mosesdecoder/scripts/generic/multi-bleu.perl $ref < $in > $bleu_c
   $mosesdecoder/scripts/generic/multi-bleu.perl -lc $ref < $in > $bleu
 
   if [ $refn -gt 1 ] ; then 
-    touch $ref
+    mv ${ref}.tmp $ref
   fi
 }
 
