@@ -535,9 +535,13 @@ submitter sge :: action_flags
     echo "cd $PWD" >> $wrapper
 
     echo "$COMMANDS" >> $wrapper
+    echo "echo \$? > exitcode" >> $wrapper
 
     # Use SGE's -sync option to prevent qsub from immediately returning
     qsub -sync y $wrapper
+    
+    EXITCODE=$(cat $PWD/exitcode)
+    [ $EXITCODE = "0" ]
   }
 }
 
