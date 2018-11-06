@@ -24,9 +24,9 @@ Doing this by hand, from my own experiences in several evaluation campaigns, is 
 
 ### I'm sold. How do I start to use it?
 
-Before you start, note that this workflow is tested on the sun grid manager configured on [CLSP](https://www.clsp.jhu.edu) grid out-of-box. But don't worry, you may only need to slightly tweak `action_flags` and `resource_flags` in the `.tconf` file to be able to use this on other grid that uses sun grid manager. Or in the worse case, you could substitute all submitter with `"bash"` to run everything locally or define your own submitter!
+Before you start, note that this workflow is tested on the sun grid manager configured on [CLSP](https://www.clsp.jhu.edu) grid out-of-box. But don't worry, you may only need to slightly tweak `action_flags` and `resource_flags` in the `main.tconf` file to be able to use this on other grid that uses sun grid manager. Or in the worse case, you could substitute all submitter with `"bash"` to run everything locally or define your own submitter!
 
-Follow this [tutorial](https://github.com/shuoyangd/tape4nmt/blob/master/TUTORIAL.md) to get started.
+The workflow is pre-configured to build an IWSLT German-English system with fairseq. Follow this [tutorial](https://github.com/shuoyangd/tape4nmt/blob/master/TUTORIAL.md) to get started.
 
 ### Hey I found your workflow does not do xxx...
 

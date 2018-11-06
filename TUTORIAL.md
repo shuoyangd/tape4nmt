@@ -27,7 +27,7 @@ We'll be using IWSLT 2014 German-English data. Download it [here](https://wit3.f
 
 ### Pipeline Configuration
 
-Usually you'll have to modify [main.tape]() to set up your experiment plan and [main.tconf]() to do some system configurations. For this tutorial, we've made a good plan for you, so just modify the submitter and the virtualenv section of `main.tconf` to your system configurations.
+Usually you'll have to modify [main.tape](https://github.com/shuoyangd/tape4nmt/blob/master/main.tape) to set up your experiment plan and [main.tconf](https://github.com/shuoyangd/tape4nmt/blob/master/main.tconf) to do some system configurations. For this tutorial, we've made a good plan for you, so just modify the submitter and the virtualenv section of `main.tconf` to your system configurations.
 
 ### Run It
 
@@ -37,9 +37,9 @@ Once you are ready, run:
 ducttape main.tape -C main.tconf
 ```
 
-You should see things spinnng up.
+You should see things spinnng up. The system build will take ~2hrs depending on your machine.
 
-The system build will take ~2hrs depending on your machine. Now it's up to the machine to do the heavy-lifting. Time for a coffee!
+Now it's up to the machine to do the heavy-lifting. Time for a coffee!
 
 ### Get Result
 
