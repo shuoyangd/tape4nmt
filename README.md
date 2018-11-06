@@ -18,31 +18,15 @@ Face the truth: MT researchers are dealing with pipeline, even we are having a e
 
 Doing this by hand, from my own experiences in several evaluation campaigns, is very error-prone and inefficient. Hence the need for a experiment management system.
 
-`tape4nmt` also fixes a lot of problems EMS has. For example, EMS consolidated workflow management and workflow definition into one gigantic perl script, with some regular expressions failing about every 6 months. `tape4nmt` however, separated these two functionalities. And hopefully you'll also see that `tape4nmt` has a better structure for maintainence.
+`tape4nmt` also fixes a lot of problems EMS has. For example, EMS consolidated workflow management and workflow definition into one gigantic perl script, with some regular expressions failing about every 6 months. `tape4nmt` however, uses `DuctTape` for workflow management and only take cares of workflow definition. It also keeps data/workflow separation in mind throughout its design. Besides, hopefully you'll also find `tape4nmt` has a better structure for maintainence.
+
+`tape4nmt` aims to support all the NMT toolkits on the market. By default we use [fairseq](https://github.com/pytorch/fairseq), but we currently support [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) as well, while [sockeye](https://github.com/awslabs/sockeye) support is in the near future. If your favorite NMT toolkit hasn't been supported yet, you should still be able to make a moderate amount of modifications and work mostly with this pipeline. (If you actually did, please consider contributing your effort!)
 
 ### I'm sold. How do I start to use it?
 
 Before you start, note that this workflow is tested on the sun grid manager configured on [CLSP](https://www.clsp.jhu.edu) grid out-of-box. But don't worry, you may only need to slightly tweak `action_flags` and `resource_flags` in the `.tconf` file to be able to use this on other grid that uses sun grid manager. Or in the worse case, you could substitute all submitter with `"bash"` to run everything locally or define your own submitter!
 
-Start by installing [DuctTape](https://github.com/jhclark/ducttape) following their readme.
-
-The workflow provided has the following general dependencies. Good news: you are not supposed to manually install any of them, because DuctTape itself is designed to manage dependency packages for you! The workflow we provide already ships with the basic package setup procedures for you to start working, but you may have to make modifications to these procedures to cater your own special system requirements. Check out all the lines starting with `packages`.
-
-+ [tape4nmt-tools](https://github.com/shuoyangd/tape4nmt-tools): The must-have -- includes scripts that we use in some of our tasks.
-+ [Moses](https://github.com/moses-smt/mosesdecoder): No need to compile -- we'll just be using scripts.
-+ [pytorch](https://github.com/pytorch/pytorch)
-+ [subword-nmt](https://github.com/rsennrich/subword-nmt)
-+ [Stanford Segmenter](https://nlp.stanford.edu/software/segmenter.shtml): (Optional) Only needed if you want to run experiment on Chinese Data.
-
-`tape4nmt` aims to support all the NMT toolkits on the market. By default we use [fairseq](https://github.com/pytorch/fairseq), but we currently support [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) as well, while [sockeye](https://github.com/awslabs/sockeye) support is in the near future. If your favorite NMT toolkit hasn't been supported yet, you should still be able to make a moderate amount of modifications and work mostly with this pipeline. (If you actually did, please consider contributing your effort!)
-
-Once you are ready, clone this repository and edit working directory and the data directories etc. And run:
-
-```
-ducttape onmt.tape -C onmt.tconf
-```
-
-You should see things spinnng up.
+Follow this [tutorial](https://github.com/shuoyangd/tape4nmt/blob/master/TUTORIAL.md) to get started.
 
 ### Hey I found your workflow does not do xxx...
 
