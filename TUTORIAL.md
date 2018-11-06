@@ -51,4 +51,4 @@ BLEU = 30.49, 64.2/37.9/24.3/15.9 (BP=0.979, ratio=0.979, hyp_len=85741, ref_len
 BLEU = 29.78, 63.1/37.1/23.7/15.4 (BP=0.979, ratio=0.979, hyp_len=85741, ref_len=87550)
 ```
 
-They are randomness here and there, but you should get roughtly the same result (<1 BLEU point difference).
+There is randomness here and there, but you should get roughtly the same result (<1 BLEU point difference).

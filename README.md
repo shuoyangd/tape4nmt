@@ -2,9 +2,7 @@
 
 ### What is that?
 
-`tape4nmt` is a [`DuctTape`](https://github.com/jhclark/ducttape) workflow created for running NMT experiments. It currently supports [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) but should be able to adapt to other frameworks with relatively modest amount of modifications.
-
-[`DuctTape`](https://github.com/jhclark/ducttape) is a workflow management system written by Jonathon Clark. If you are writing bash scripts to run experiments, you may want to consider using `DuctTape` instead. It organizes your experiment script such that:
+`tape4nmt` is a [`DuctTape`](https://github.com/jhclark/ducttape) workflow created to replace your bash scripts for running NMT experiments. [`DuctTape`](https://github.com/jhclark/ducttape) is a workflow management system written by Jonathon Clark. In general, if you are writing bash scripts to run any experiments, you may want to consider using `DuctTape` instead. It organizes your experiment scripts such that:
 
 1.  you are much less likely to do stupid things by e.g. deleting your best model by accident, use the wrong data for the experiment, the list goes on;
 2.  you can easily run, delete, and/or re-run batch experiments, re-using any partial results possible, with correctness guarantee;
