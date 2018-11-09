@@ -45,8 +45,14 @@ submitter sge :: action_flags
     echo "cd $PWD" >> $wrapper
 
     echo "$COMMANDS" >> $wrapper
+    echo "echo \$? > exitcode" >> $wrapper  # saves the exit code of the inner process
 
     # Use SGE's -sync option to prevent qsub from immediately returning
     qsub -sync y $wrapper
+
+    # restore the exit code saved from the inner process
+    EXITCODE=$(cat $PWD/exitcode)
+    [ $EXITCODE = "0" ]
+
   }
 }
