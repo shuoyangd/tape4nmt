@@ -38,3 +38,20 @@ versioner git :: repo ref {
     git log -1 | awk '/^Date/{$1=""; print}' > $date
   }
 }
+
+versioner pip :: package version {
+  action checkout > dir {
+    pip install $package==$version
+    echo > $dir
+  }
+
+  action repo_version > version {
+    pip show $package | grep ^Version: | cut -d' ' -f2 > $version
+  }
+
+  # Used to confirm version after checkout
+  action local_version > version date {
+    sacrebleu -V > $version
+    echo > $date
+  }
+}
