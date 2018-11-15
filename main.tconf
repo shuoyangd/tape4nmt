@@ -1,0 +1,22 @@
+import "confs/data.tconf"
+import "confs/pipeline.tconf"
+import "confs/train.tconf"
+
+global {
+  # options for cleanining training data
+  Ratio=1
+  MaxLen=80
+
+  # no of BPE operations
+  bpe_operations=(BpeMergeOps: 49500 9500)
+
+  # sge submitter config
+  njobs=50
+  submitter="sge"
+  resource_flags="-l 'mem_free=2g,ram_free=2g'"
+  action_flags="-m ae -M dings@jhu.edu"
+
+  # virtual env location
+  pyenv="/path/to/virtualenv"
+}
+

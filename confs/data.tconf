@@ -1,0 +1,43 @@
+global {
+
+  SRC=(TrainDataSource:
+    iwslt_deen_2014="de"
+  )
+  TRG=(TrainDataSource:
+    iwslt_deen_2014="en"
+  )
+  trg_lang=en  # FIXME (only used by wrap_xml, under some rare cases)
+
+  train_data=(TrainDataSource:
+    iwslt_deen_2014=(side:
+      src="/path/to/iwslt/train.tags.nourl.de-en.de"
+      trg="/path/to/iwslt/train.tags.nourl.de-en.en"
+    )
+  )
+
+  dev_data=(DevDataSource:
+    iwslt_deen_dev2010=(side:
+      src="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.en.xml"
+    )
+    iwslt_deen_dev2012=(side:
+      src="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.en.xml"
+    )
+  )
+
+  test_data=(TestDataSource:
+    iwslt_deen_test2010=(side:
+      src="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.en.xml"
+    )
+    iwslt_deen_test2011=(side:
+      src="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.en.xml"
+    )
+    iwslt_deen_test2012=(side:
+      src="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.en.xml"
+    )
+  )
+}
