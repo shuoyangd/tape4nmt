@@ -21,23 +21,10 @@ package fairseq
   python setup.py build develop
 }
 
-package sockeye :: .versioner=git .path="/home/hltcoe/mpost/code/sockeye" .ref=HEAD {
+package sockeye :: .versioner=git .repo="/home/hltcoe/mpost/code/sockeye" .ref=HEAD { }
 
-}
+package subword_nmt :: .versioner=git .repo="https://github.com/rsennrich/subword-nmt" .ref=HEAD { }
 
-package sacrebleu :: .versioner=pip .package="sacrebleu" .version="1.2.12" {
+package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD { }
 
-}
-
-package subword_nmt :: .versioner=git .repo="https://github.com/rsennrich/subword-nmt" .ref=HEAD {
-
-}
-
-package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD {
-
-}
-
-# enable this when processing Chinese
-# package stanford_seg :: .versioner=disk .path="/path/to/stanford-seg" {
-# 
-# }
+package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.2.12" { }
