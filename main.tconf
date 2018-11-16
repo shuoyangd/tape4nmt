@@ -1,22 +1,99 @@
 import "confs/data.tconf"
 import "confs/pipeline.tconf"
-import "confs/train.tconf"
 
 global {
-  # options for cleanining training data
-  Ratio=1
-  MaxLen=80
+  ##################################################################################################
+  # General options you should set for your environment
+  ##################################################################################################
+
+  # All ducttape files will be written underneath this directory
+  ducttape_output="out"
+
+  # SGE submitter config
+  njobs=50
+  submitter=(TestMode: no="sge" yes="shell")
+  action_flags="-m ae -M post@cs.jhu.edu"
+  resource_flags="-l mem_free=2g"
+  resource_flags_16g="-l mem_free=16g"
+  resource_flags_train="-q gpu.q -l gpu=1,mem_free=4g"
+  resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g"
+
+  # Virtual env location. This should be a file path to the virtual env you want loaded before tasks.
+  pyenv="conda:sockeye-cpu"
+
+  ##################################################################################################
+  # Task options: language pair and train / dev / test data
+  ##################################################################################################
+
+  # TODO
+
+  ##################################################################################################
+  # Preprocessing options
+  ##################################################################################################
 
   # no of BPE operations
   bpe_operations=(BpeMergeOps: 49500 9500)
 
-  # sge submitter config
-  njobs=50
-  submitter="sge"
-  resource_flags="-l 'mem_free=2g,ram_free=2g'"
-  action_flags="-m ae -M dings@jhu.edu"
+  # options for cleaning training data
+  MaxLen=80
+  Ratio=1
+  train_max_sent_length=(TestMode: no=100 yes=10)
 
-  # virtual env location
-  pyenv="/path/to/virtualenv"
+  ##################################################################################################
+  # Training options
+  ##################################################################################################
+
+  use_cpu=(TestMode: no yes)
+
+  num_layers=(TestMode: no="6:6" yes="1:1")
+  model_size=512
+  embed_size="512:512"
+
+  # all default is consistent with nematus
+  train_train_from="" # if there is a previous model to start with
+  train_train_from_state_dict="" # if there is a previous dict to start with
+  train_start_epoch="" # if trained for certain amount of epochs previously
+
+  train_batch_type=(TestMode: no="word" yes="sentence")
+  train_batch_size=(TestMode: no="80" yes=8)
+  train_optim="adam"
+  train_dropout=(Dropout: 0.1 0.3 0.5)
+  train_lr="0.001"
+
+  # train_lr_min="1e-8"
+  train_lr_min=""
+  train_lr_shrink="0.5"
+
+  # train_lr_scheduler="inverse_sqrt"
+  # train_warmup_init_lr="1e-07"
+  # train_warmup_updates="4000"
+  # train_criterion="label_smoothed_cross_entropy"
+  # train_label_smoothing="0.1"
+  train_lr_scheduler=""
+  train_warmup_init_lr=""
+  train_warmup_updates=""
+  train_criterion=""
+  train_label_smoothing=""
+  train_clip_norm=(ClipNorm: 0.0 0.1 0.5 1 5)
+  train_max_tokens="4000"
+  train_arch=(Architecture: conv="fconv" transformer="transformer" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en")
+  train_share_input_output_embed=""
+  train_skip_invalid_size_inputs_valid_test="yes"
+  train_adam_beta1="0.9"
+  train_adam_beta2="0.999"
+
+  # Sockeye
+  train_checkpoint_freq=(TestMode: no=5000 yes=100)
+  train_max_checkpoints_not_improved=(TestMode: no=16 yes=0)
+  train_num_decode_and_eval=(TestMode: no=500 yes=10)
+
+  # TEST CONFIGURATIONS
+  test_model_selection_strategy="acc"
+  test_max_sent_length="300"
+  test_beam_size=(TestMode: no="12" yes="1")
+  test_batch_size=1
+  test_replace_unk="True"
+  test_remove_bpe=""
+
 }
 
