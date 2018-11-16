@@ -30,8 +30,8 @@ submitter sge :: action_flags
               :: TASK REALIZATION TASK_VARIABLES CONFIGURATION {
   action run {
     wrapper="ducttape_job.sh"
-    echo "#$ resource_flags" >> $wrapper
-    echo "#$ action_flags" >> $wrapper
+    echo "#$ $resource_flags" >> $wrapper
+    echo "#$ $action_flags" >> $wrapper
     echo "#$ -j y" >> $wrapper
     echo "#$ -o localhost:$PWD/job.out" >> $wrapper
     echo "#$ -N $CONFIGURATION-$TASK-$REALIZATION" >> $wrapper
