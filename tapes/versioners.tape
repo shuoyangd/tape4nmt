@@ -39,10 +39,9 @@ versioner git :: repo ref {
   }
 }
 
-versioner pip :: package version {
+versioner pip :: package tag {
   action checkout > dir {
-    pip install $package==$version
-    echo > $dir
+    pip install $package==$tag
   }
 
   action repo_version > version {
@@ -55,3 +54,4 @@ versioner pip :: package version {
     echo > $date
   }
 }
+
