@@ -19,7 +19,10 @@ global {
   resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g"
 
   # Virtual env location. This should be a file path to the virtual env you want loaded before tasks.
-  pyenv="conda:sockeye-cpu"
+  # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
+  # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
+  # the path to the script that should be loaded.
+  pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
 
   ##################################################################################################
   # Task options: language pair and train / dev / test data
