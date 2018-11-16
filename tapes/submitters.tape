@@ -2,8 +2,7 @@
 # TASK, REALIZATION, CONFIGURATION: variables passed by ducttape
 submitter shell :: COMMANDS TASK_VARIABLES {
   action run {
-    set +u
-    if [[ ! -z $pyenv ]]; then
+    if [[ ! -z ${pyenv:-} ]]; then
       virtualenv=$pyenv
 
       # Load the environment
@@ -15,7 +14,6 @@ submitter shell :: COMMANDS TASK_VARIABLES {
         source $virtualenv
       fi
     fi
-    set -u
 
     STARTED=$(date +%s)
     time eval "$COMMANDS"
