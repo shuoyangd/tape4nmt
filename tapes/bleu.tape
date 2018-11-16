@@ -41,5 +41,5 @@ task sacrebleu : sacrebleu
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
   cat $in | sacrebleu $ref | cut -d' ' -f1 > $signature
-  cat $in | sacrebleu $ref | cut -d' ' -f1 -b > $bleu
+  cat $in | sacrebleu $ref -b > $bleu
 }
