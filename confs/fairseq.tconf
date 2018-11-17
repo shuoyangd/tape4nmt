@@ -1,0 +1,40 @@
+global {
+  # TRAINING CONFIGURATIONS
+  # all default is consistent with nematus
+  train_train_from="" # if there is a previous model to start with
+  train_train_from_state_dict="" # if there is a previous dict to start with
+  train_start_epoch="" # if trained for certain amount of epochs previously
+
+  train_batch_size="80"
+  train_optim="adam"
+  train_dropout=(Dropout: 0.1 0.3 0.5)
+  train_lr="0.001"
+  # train_lr_min="1e-8"
+  train_lr_min=""
+  train_lr_shrink="0.5"
+  # train_lr_scheduler="inverse_sqrt"
+  # train_warmup_init_lr="1e-07"
+  # train_warmup_updates="4000"
+  # train_criterion="label_smoothed_cross_entropy"
+  # train_label_smoothing="0.1"
+  train_lr_scheduler=""
+  train_warmup_init_lr=""
+  train_warmup_updates=""
+  train_criterion=""
+  train_label_smoothing=""
+  train_clip_norm=(ClipNorm: 0.0 0.1 0.5 1 5)
+  train_max_tokens="4000"
+  train_arch=(Architecture: conv="fconv" transformer="transformer" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en")
+  train_share_input_output_embed=""
+  train_skip_invalid_size_inputs_valid_test="yes"
+  train_adam_beta1="0.9"
+  train_adam_beta2="0.999"
+
+  # TEST CONFIGURATIONS
+  test_model_selection_strategy="acc"
+  test_max_sent_length="300"
+  test_beam_size="12"
+  test_batch_size="32"
+  test_replace_unk="True"
+  test_remove_bpe=""
+}

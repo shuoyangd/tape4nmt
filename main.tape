@@ -33,9 +33,9 @@ import "tapes/bpe.tape"
 
 # task binarize_data, train and decode fits in here in the execution order
 # these tasks are usually the ones that needs to be defined for each toolkit
-import "tapes/fairseq.tape"
+# import "tapes/fairseq.tape"
 # import "tapes/onmt.tape"
-# import "tapes/sockeye.tape"
+import "tapes/sockeye.tape"
 
 # the order here is the reverse of the preprocessing
 # usually: debpe -> detruecase -> detokenize
@@ -54,7 +54,8 @@ plan test {
     (DoTruecase: yes) * (DoBPE: yes) * (TrainDataSource: iwslt_deen_2014) * 
     (DevDataSource: iwslt_deen_dev2010 iwslt_deen_dev2012) * 
     (TestDataSource: iwslt_deen_test2010 iwslt_deen_test2011 iwslt_deen_test2012) * 
-    (Architecture: fconv_iwslt_de_en) * (ClipNorm: 0.1) * (Dropout: 0.1) * (BpeMergeOps: 49500)
+    (Architecture: fconv_iwslt_de_en) * (ClipNorm: 0.1) * (Dropout: 0.1) * (BpeMergeOps: 49500) *
+    (TestMode: yes)
 }
 
 # Nuts and bolts:
