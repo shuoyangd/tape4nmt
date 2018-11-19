@@ -39,12 +39,6 @@ global {
   pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
 
   ##################################################################################################
-  # Task options: language pair and train / dev / test data
-  ##################################################################################################
-
-  # TODO: the data used for these experiments should be listed here.
-
-  ##################################################################################################
   # Preprocessing options
   ##################################################################################################
 
@@ -57,15 +51,3 @@ global {
 
   use_cpu=(TestMode: no yes)
 }
-<<<<<<< Updated upstream:main.tconf
-
-##################################################################################################
-# Training options
-##################################################################################################
-
-# Load one of these, depending on what you're using
-
-# import confs/fairseq.tconf
-import confs/sockeye.conf
-=======
->>>>>>> Stashed changes:fairseq.tconf

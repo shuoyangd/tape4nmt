@@ -9,27 +9,6 @@ global {
   # All ducttape files will be written underneath this directory
   ducttape_output="out"
 
-  ##################################################################################################
-  # Preprocessing options
-  ##################################################################################################
-
-  # Sentencepiece
-  sentencepiece_model_type=unigram
-  sentencepiece_vocab_size=32000
-
-  # no of BPE operations
-  bpe_operations=(BpeMergeOps: 49500 9500)
-
-  # options for cleaning training data
-  MaxLen=80
-  Ratio=1
-
-  use_cpu=(TestMode: no yes)
-
-  ##################################################################################################
-  # Training parameters
-  ##################################################################################################
-
   num_layers=(TestMode: no="6:6" yes="1:1")
   model_size=512
   embed_size="512:512"
@@ -107,4 +86,21 @@ global {
   # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
   # the path to the script that should be loaded.
   pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+
+  ##################################################################################################
+  # Preprocessing options
+  ##################################################################################################
+
+  # sentencepiece options
+  sentencepiece_vocab_size=8000
+  sentencepiece_model_type="unigram"
+
+  # no of BPE operations
+  bpe_operations=(BpeMergeOps: 49500 9500)
+
+  # options for cleaning training data
+  MaxLen=80
+  Ratio=1
+
+  use_cpu=(TestMode: no yes)
 }
