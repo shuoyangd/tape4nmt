@@ -20,10 +20,10 @@ global {
   resource_flags_16g="-l mem_free=16g"
 
   # SGE: flags for training a model
-  resource_flags_train="-q gpu.q -l gpu=1,mem_free=4g"
+  resource_flags_train="-q g.q -l gpu=1,mem_free=4g"
 
   # SGE: flags for decoding
-  resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g"
+  resource_flags_decode="-q g.q -l gpu=1,mem_free=4g"
 
   # SGE: flags for notifying about job completion (put in your email address!)
   action_flags="-m ae -M YOUR_EMAIL_HERE"
@@ -63,5 +63,5 @@ global {
 
 # Load one of these, depending on what you're using
 
-# import confs/fairseq.conf
+# import confs/fairseq.tconf
 import confs/sockeye.conf

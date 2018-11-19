@@ -38,7 +38,8 @@ task sacrebleu : sacrebleu
     < ref=$out@dummy_aggregate_merge[DataSection:devtest,DevtestDataSection:test,side:trg]
     > bleu
     > signature
-    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
+    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags
+    :: pyenv=@ {
 
   cat $in | sacrebleu $ref | cut -d' ' -f1 > $signature
   cat $in | sacrebleu $ref -b > $bleu

@@ -2,6 +2,7 @@
 # TASK, REALIZATION, CONFIGURATION: variables passed by ducttape
 submitter shell :: COMMANDS TASK_VARIABLES {
   action run {
+    set +u
     if [[ ! -z ${pyenv:-} ]]; then
       virtualenv=$pyenv
 
@@ -20,6 +21,7 @@ submitter shell :: COMMANDS TASK_VARIABLES {
     STOPPED=$(date +%s)
     TIME=$(($STOPPED - $STARTED))
     echo $TIME > ducttape_time.txt
+    set -u
   } 
 }
 

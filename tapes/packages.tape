@@ -1,23 +1,47 @@
 package tools
-    :: .versioner=git .repo="https://github.com/shuoyangd/tape4nmt-tools" .ref=HEAD {
+    :: .versioner=git .repo="https://github.com/shuoyangd/tape4nmt-tools" .ref=HEAD
+    :: pyenv="/path/to/virtualenv" {
 
-  # TODO: if you have a virtualenv, enable these lines
-  # set +u
-  # source /path/to/virtualenv
-  # set -u
+  set +u
+  if [[ ! -z $pyenv ]]; then
+    virtualenv=$pyenv
+
+    # Load the environment
+    if [[ $virtualenv == conda:* ]]; then
+      . /opt/anaconda3/etc/profile.d/conda.sh
+      target=$(echo $virtualenv | cut -d: -f2-)
+      conda activate $target
+    else
+      source $virtualenv
+    fi
+  fi
+  set -u
+
   pip install -r requirements.txt
 }
 
 # using my fork for now, as fairseq evolves pretty fast
 package fairseq
     :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=HEAD
+    :: pyenv="/path/to/virtualenv"
     :: realref="refs/remotes/origin/master" {
 
-  # TODO: if you have a virtualenv, enable these lines
   git checkout -b working $realref
-  # set +u
-  # source /path/to/virtualenv
-  # set -u
+
+  set +u
+  if [[ ! -z $pyenv ]]; then
+    virtualenv=$pyenv
+
+    # Load the environment
+    if [[ $virtualenv == conda:* ]]; then
+      . /opt/anaconda3/etc/profile.d/conda.sh
+      target=$(echo $virtualenv | cut -d: -f2-)
+      conda activate $target
+    else
+      source $virtualenv
+    fi
+  fi
+  set -u
   python setup.py build develop
 }
 
@@ -27,4 +51,4 @@ package subword_nmt :: .versioner=git .repo="https://github.com/rsennrich/subwor
 
 package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD { }
 
-package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.2.12" { }
+package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.2.12" .pyenv="/path/to/virtualenv" { }
