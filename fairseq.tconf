@@ -1,5 +1,6 @@
 import "confs/data.tconf"
 import "confs/pipeline.tconf"
+import "confs/fairseq.conf"
 
 global {
   ##################################################################################################
@@ -56,6 +57,7 @@ global {
 
   use_cpu=(TestMode: no yes)
 }
+<<<<<<< Updated upstream:main.tconf
 
 ##################################################################################################
 # Training options
@@ -65,3 +67,5 @@ global {
 
 # import confs/fairseq.tconf
 import confs/sockeye.conf
+=======
+>>>>>>> Stashed changes:fairseq.tconf
