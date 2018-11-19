@@ -1,22 +1,67 @@
 import "confs/data.tconf"
 import "confs/pipeline.tconf"
-import "confs/train.tconf"
 
 global {
-  # options for cleanining training data
-  Ratio=1
-  MaxLen=80
+  ##################################################################################################
+  # General options you should set for your environment
+  ##################################################################################################
+
+  # All ducttape files will be written underneath this directory
+  ducttape_output="out"
+
+  ##################################################################################################
+  # Job parameters
+  ##################################################################################################
+
+  # SGE: generic job flags
+  resource_flags="-l mem_free=2g"
+
+  # SGE: larger job flags
+  resource_flags_16g="-l mem_free=16g"
+
+  # SGE: flags for training a model
+  resource_flags_train="-q g.q -l gpu=1,mem_free=4g"
+
+  # SGE: flags for decoding
+  resource_flags_decode="-q g.q -l gpu=1,mem_free=4g"
+
+  # SGE: flags for notifying about job completion (put in your email address!)
+  action_flags="-m ae -M YOUR_EMAIL_HERE"
+
+  # The default submitter: shell (run locally) or sge (run on a grid)
+  submitter=(TestMode: no="sge" yes="shell")
+
+  # Virtual env location. This should be a file path to the virtual env you want loaded before tasks.
+  # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
+  # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
+  # the path to the script that should be loaded.
+  pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+
+  ##################################################################################################
+  # Task options: language pair and train / dev / test data
+  ##################################################################################################
+
+  # TODO: the data used for these experiments should be listed here.
+
+  ##################################################################################################
+  # Preprocessing options
+  ##################################################################################################
 
   # no of BPE operations
   bpe_operations=(BpeMergeOps: 49500 9500)
 
-  # sge submitter config
-  njobs=50
-  submitter="sge"
-  resource_flags="-l 'mem_free=2g,ram_free=2g'"
-  action_flags="-m ae -M dings@jhu.edu"
+  # options for cleaning training data
+  MaxLen=80
+  Ratio=1
 
-  # virtual env location
-  pyenv="/path/to/virtualenv"
+  use_cpu=(TestMode: no yes)
 }
 
+##################################################################################################
+# Training options
+##################################################################################################
+
+# Load one of these, depending on what you're using
+
+# import confs/fairseq.tconf
+import confs/sockeye.conf

@@ -10,7 +10,7 @@ task train_clean : mosesdecoder
     :: MaxLen=@ {
 
   mkdir -p tmp
-  filename=`basename $src_in`
+  filename=$(basename $src_in)
   cp $src_in tmp/$filename.$SRC
   cp $trg_in tmp/$filename.$TRG
   in=tmp/$filename
