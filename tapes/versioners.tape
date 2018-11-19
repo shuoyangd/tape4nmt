@@ -76,7 +76,7 @@ versioner pip :: package tag pyenv {
     set -u
 
     pip show $package | grep ^Version: | cut -d' ' -f2 > $version ||
-      echo "VERSIONING_UNSUPPORTED" > $version
+      echo "0" > $version
   }
 
   # Used to confirm version after checkout
