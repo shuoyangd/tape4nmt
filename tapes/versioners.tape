@@ -28,6 +28,8 @@ versioner disk :: path {
 versioner git :: repo ref {
   action checkout > dir {
     git clone $repo $dir
+    cd $dir
+    git checkout $ref
   }
   action repo_version > version {
     git ls-remote $repo $ref | cut -f1 > $version

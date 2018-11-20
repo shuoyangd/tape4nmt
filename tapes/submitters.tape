@@ -2,7 +2,7 @@
 # TASK, REALIZATION, CONFIGURATION: variables passed by ducttape
 submitter shell :: COMMANDS TASK_VARIABLES {
   action run {
-    set +u
+    set +u  # needed to fix a virtualenv bug
     if [[ ! -z ${pyenv:-} ]]; then
       virtualenv=$pyenv
 
@@ -22,6 +22,7 @@ submitter shell :: COMMANDS TASK_VARIABLES {
     STOPPED=$(date +%s)
     TIME=$(($STOPPED - $STARTED))
     echo $TIME > ducttape_time.txt
+    set -u
   } 
 }
 
@@ -56,7 +57,7 @@ submitter sge :: action_flags
     # Setup the virtual environment
     cat >> $wrapper <<EOF
 
-    set +u
+    set +u  # needed to fix a virtualenv bug
     if [[ ! -z \${pyenv:-} ]]; then
       virtualenv=\$pyenv
 
