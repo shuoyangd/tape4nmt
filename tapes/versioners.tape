@@ -39,42 +39,12 @@ versioner git :: repo ref {
   }
 }
 
-versioner pip :: package tag pyenv {
+versioner pip :: package tag {
   action checkout > dir {
-    set +u
-    if [[ ! -z $pyenv ]]; then
-      virtualenv=$pyenv
-
-      # Load the environment
-      if [[ $virtualenv == conda:* ]]; then
-        . /opt/anaconda3/etc/profile.d/conda.sh
-        target=$(echo $virtualenv | cut -d: -f2-)
-        conda activate $target
-      else
-        source $virtualenv
-      fi
-    fi
-    set -u
-
     pip install $package==$tag
   }
 
   action repo_version > version {
-    set +u
-    if [[ ! -z $pyenv ]]; then
-      virtualenv=$pyenv
-
-      # Load the environment
-      if [[ $virtualenv == conda:* ]]; then
-        . /opt/anaconda3/etc/profile.d/conda.sh
-        target=$(echo $virtualenv | cut -d: -f2-)
-        conda activate $target
-      else
-        source $virtualenv
-      fi
-    fi
-    set -u
-
     pip show $package | grep ^Version: | cut -d' ' -f2 > $version ||
       echo "0" > $version
   }
