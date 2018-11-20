@@ -11,7 +11,7 @@ func tokenize : mosesdecoder tools # stanford_seg
     rm -r $PWD/tmp
 
   else
-    $mosesdecoder/scripts/tokenizer/normalize-punctuation.perl -l $Lang < $in | $mosesdecoder/scripts/tokenizer/tokenizer.perl -a -l $Lang > $out
+    $mosesdecoder/scripts/tokenizer/normalize-punctuation.perl -l $Lang < $in | $mosesdecoder/scripts/tokenizer/tokenizer.perl -a -l $Lang -no-escape -q > $out
   fi
 }
 

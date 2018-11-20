@@ -8,7 +8,6 @@ task nist_bleu : mosesdecoder
     > bleu_c
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
-
   $mosesdecoder/scripts/generic/mteval-v13a.pl -s $wrap_template -r $ref -t $in > $bleu
   $mosesdecoder/scripts/generic/mteval-v13a.pl -c -s $wrap_template -r $ref -t $in > $bleu_c
 }

@@ -1,12 +1,12 @@
 global {
   dev_text=(SgmDev:
-    yes=(side: src=$src_out@dev_text_from_sgm trg=$trg_out@dev_text_from_sgm)
     no=$out@download_or_link[DevtestDataSection:dev]
+    yes=(side: src=$src_out@dev_text_from_sgm trg=$trg_out@dev_text_from_sgm)
   )
 
   test_text=(SgmTest:
-    yes=(side: src=$src_out@test_text_from_sgm trg=$trg_out@test_text_from_sgm)
     no=$out@download_or_link[DevtestDataSection:test]
+    yes=(side: src=$src_out@test_text_from_sgm trg=$trg_out@test_text_from_sgm)
   )
 
   src_truecaser=(UseExistingTruecaser:
@@ -19,7 +19,6 @@ global {
   )
 
   merged_data=(MergeTest:
-    yes=$out@merge
     no=(DataSection:
       train=$out@merge[DataSection:train]
       devtest=(DevtestDataSection:
@@ -27,6 +26,7 @@ global {
         test=$test_text
       )
     )
+    yes=$out@merge
   )
 
   tokenized_data=(DoTokenize:
@@ -47,14 +47,16 @@ global {
     no=$tokenized_data
   )
 
-  bped_data=(DoBPE:
-    yes=$out@apply_bpe
-    no=$truecased_data
+  prepared_data=(SubwordMethod:
+    sentencepiece=$out@apply_sentencepiece
+    bpe=$out@apply_bpe
+    none=$truecased_data
   )
 
-  debped_output=(DoBPE:
-    yes=$out@debpe
-    no=$out@decode
+  debped_output=(SubwordMethod:
+    sentencepiece=$out@remove_sentencepiece
+    bpe=$out@debpe
+    none=$out@decode
   )
 
   # don't do truecase when doing characterize

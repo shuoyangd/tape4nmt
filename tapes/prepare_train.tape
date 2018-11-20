@@ -25,10 +25,10 @@ task train_sample : tools
     < trg_in=$trg_out@train_clean
     > src_out
     > trg_out
-    :: train_sample_size=(TrainSampleSize: 100000 250000 500000 1000000 DontSample="") {
+    :: train_sample_size=(TrainSampleSize: DontSample="" 100000 250000 500000 1000000) {
 
   linen=`wc -l $src_in | awk '{ print $1}'`
-  if [ -z "$train_sample_size" ] || [[ "$train_sample_size" -ge "$linen" ]] ; then
+  if [[ -z $train_sample_size ]] || [[ $train_sample_size -ge $linen ]] ; then
     tee < $src_in > $src_out
     tee < $trg_in > $trg_out
   else

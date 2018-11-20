@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -u
+
+TOOLKIT=${1:-}
+
+if [[ -z $TOOLKIT ]]; then
+    echo "Usage: run TOOLKIT [TCONF]"
+    echo "where TOOLKIT is one of {sockeye,fairseq}."
+    echo "TCONF defaults to ./TOOLKIT.tconf."
+    exit 1
+fi
+shift
+
+TCONF=$TOOLKIT.tconf
+if [[ ! -e $TCONF ]]; then
+    echo "Fatal: Couldn't find $TOOLKIT.tconf"
+    exit 1
+fi
+
+DUCTTAPE=$(which ducttape)
+if [[ $? -ne 0 ]]; then
+   echo "Can't find ducttape."
+   exit 1
+fi
+
+${DUCTTAPE} ${TOOLKIT}.tape -C ${TCONF} $@

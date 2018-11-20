@@ -28,6 +28,8 @@ versioner disk :: path {
 versioner git :: repo ref {
   action checkout > dir {
     git clone $repo $dir
+    cd $dir
+    git checkout $ref
   }
   action repo_version > version {
     git ls-remote $repo $ref | cut -f1 > $version
@@ -39,44 +41,14 @@ versioner git :: repo ref {
   }
 }
 
-versioner pip :: package tag pyenv {
+versioner pip :: package tag {
   action checkout > dir {
-    set +u
-    if [[ ! -z $pyenv ]]; then
-      virtualenv=$pyenv
-
-      # Load the environment
-      if [[ $virtualenv == conda:* ]]; then
-        . /opt/anaconda3/etc/profile.d/conda.sh
-        target=$(echo $virtualenv | cut -d: -f2-)
-        conda activate $target
-      else
-        source $virtualenv
-      fi
-    fi
-    set -u
-
     pip install $package==$tag
   }
 
   action repo_version > version {
-    set +u
-    if [[ ! -z $pyenv ]]; then
-      virtualenv=$pyenv
-
-      # Load the environment
-      if [[ $virtualenv == conda:* ]]; then
-        . /opt/anaconda3/etc/profile.d/conda.sh
-        target=$(echo $virtualenv | cut -d: -f2-)
-        conda activate $target
-      else
-        source $virtualenv
-      fi
-    fi
-    set -u
-
     pip show $package | grep ^Version: | cut -d' ' -f2 > $version ||
-      echo "VERSIONING_UNSUPPORTED" > $version
+      echo "0" > $version
   }
 
   # Used to confirm version after checkout

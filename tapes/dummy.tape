@@ -25,6 +25,6 @@ task dummy_aggregate_truecase calls dummy
     < in=$truecased_data
     > out
 
-task dummy_aggregate_bpe calls dummy
-    < in=$bped_data
+task dummy_aggregate_subword calls dummy
+    < in=$prepared_data
     > out

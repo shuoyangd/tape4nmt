@@ -1,5 +1,6 @@
 import "confs/data.tconf"
 import "confs/pipeline.tconf"
+import "confs/fairseq.tconf"
 
 global {
   ##################################################################################################
@@ -38,14 +39,12 @@ global {
   pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
 
   ##################################################################################################
-  # Task options: language pair and train / dev / test data
-  ##################################################################################################
-
-  # TODO: the data used for these experiments should be listed here.
-
-  ##################################################################################################
   # Preprocessing options
   ##################################################################################################
+
+  # sentencepiece options
+  sentencepiece_vocab_size=8000
+  sentencepiece_model_type="unigram"
 
   # no of BPE operations
   bpe_operations=(BpeMergeOps: 49500 9500)
@@ -56,12 +55,3 @@ global {
 
   use_cpu=(TestMode: no yes)
 }
-
-##################################################################################################
-# Training options
-##################################################################################################
-
-# Load one of these, depending on what you're using
-
-# import confs/fairseq.tconf
-import confs/sockeye.conf

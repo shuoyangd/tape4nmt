@@ -6,6 +6,15 @@ task debpe
   cat $in | sed -r 's/\@\@ //g' > $out
 }
 
+task remove_sentencepiece
+  < in=$out@decode
+  < model=$model@train_sentencepiece
+  > out
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
+
+  cat $in | spm_decode --model $model > $out
+}
+
 task detruecase : mosesdecoder
     < in=$debped_output
     > out
