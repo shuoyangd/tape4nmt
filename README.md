@@ -18,7 +18,7 @@ Doing this by hand, from my own experiences in several evaluation campaigns, is 
 
 `tape4nmt` also fixes a lot of problems EMS has. For example, EMS consolidated workflow management and workflow definition into one gigantic perl script, with some regular expressions failing about every 6 months. `tape4nmt` however, uses `DuctTape` for workflow management and only take cares of workflow definition. It also keeps data/workflow separation in mind throughout its design. Besides, hopefully you'll also find `tape4nmt` has a better structure for maintainence.
 
-`tape4nmt` aims to support all the NMT toolkits on the market. By default we use [fairseq](https://github.com/pytorch/fairseq), but we currently support [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) as well, while [sockeye](https://github.com/awslabs/sockeye) support is in the near future. If your favorite NMT toolkit hasn't been supported yet, you should still be able to make a moderate amount of modifications and work mostly with this pipeline. (If you actually did, please consider contributing your effort!)
+`tape4nmt` aims to support all major NMT toolkits on the market. By default we use [fairseq](https://github.com/pytorch/fairseq), but we currently support [sockeye](https://github.com/awslabs/sockeye) as well, while [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) support is in the near future. If your favorite NMT toolkit hasn't been supported yet, you should still be able to make a moderate amount of modifications and work mostly with this pipeline. (If you actually did, please consider contributing your effort!)
 
 ### I'm sold. How do I start to use it?
 
