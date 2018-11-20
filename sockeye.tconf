@@ -96,7 +96,7 @@ global {
   sentencepiece_model_type="unigram"
 
   # no of BPE operations
-  bpe_operations=(BpeMergeOps: 49500 9500)
+  bpe_operations=32000
 
   # options for cleaning training data
   MaxLen=80

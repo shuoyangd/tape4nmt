@@ -47,14 +47,16 @@ global {
     no=$tokenized_data
   )
 
-  bped_data=(DoBPE:
-    yes=$out@apply_bpe
-    no=$truecased_data
+  prepared_data=(SubwordMethod:
+    sentencepiece=$out@apply_sentencepiece
+    bpe=$out@apply_bpe
+    none=$truecased_data
   )
 
-  debped_output=(DoBPE:
-    yes=$out@debpe
-    no=$out@decode
+  debped_output=(SubwordMethod:
+    sentencepiece=$out@remove_sentencepiece
+    bpe=$out@debpe
+    none=$out@decode
   )
 
   # don't do truecase when doing characterize

@@ -48,12 +48,10 @@ import "tapes/bleu.tape"
 
 plan test {
   reach sacrebleu via 
-    (MergeTest: yes) * 
-    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: yes) * 
-    (DoTruecase: yes) * (DoBPE: yes) * (TrainDataSource: iwslt_deen_2014) * 
-    (DevDataSource: iwslt_deen_dev2010 iwslt_deen_dev2012) * 
-    (TestDataSource: iwslt_deen_test2010 iwslt_deen_test2011 iwslt_deen_test2012) * 
-    (Architecture: fconv_iwslt_de_en) * (ClipNorm: 0.1) * (Dropout: 0.1) * (BpeMergeOps: 49500) *
+    (SubwordMethod: sentencepiece) * (DoTokenize: no) * (DoTruecase: no) * 
+    (TrainDataSource: iwslt_deen_2014) * 
+    (SgmDev: yes) * (DevDataSource: iwslt_deen_dev2012) * 
+    (SgmTest: yes) * (TestDataSource: iwslt_deen_test2012_small) * 
     (TestMode: yes)
 }
 
