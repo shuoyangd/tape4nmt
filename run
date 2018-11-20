@@ -10,11 +10,12 @@ if [[ -z $TOOLKIT ]]; then
     echo "TCONF defaults to ./TOOLKIT.tconf."
     exit 1
 fi
-
 shift
-TCONF=${2:-$TOOLKIT.tconf}
-if [[ ! -z ${2:-} ]]; then
-    shift
+
+TCONF=$TOOLKIT.tconf
+if [[ ! -e $TCONF ]]; then
+    echo "Fatal: Couldn't find $TOOLKIT.tconf"
+    exit 1
 fi
 
 DUCTTAPE=$(which ducttape)
@@ -23,4 +24,4 @@ if [[ $? -ne 0 ]]; then
    exit 1
 fi
 
-ducttape $TOOLKIT.tape -C $TCONF "$@"
+${DUCTTAPE} ${TOOLKIT}.tape -C ${TCONF} $@

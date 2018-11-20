@@ -27,7 +27,7 @@ task train_sentencepiece : sentencepiece
   :: sentencepiece_vocab_size=@
   :: sentencepiece_model_type=@ {
 
-  spm_train --input $src_in,$trg_in --model_prefix sp --vocab_size $sentencepiece_vocab_size --character_coverage 1.0 --model_type $sentencepiece_model_type
+  ${sentencepiece}/build/src/spm_train --input $src_in,$trg_in --model_prefix sp --vocab_size $sentencepiece_vocab_size --character_coverage 1.0 --model_type $sentencepiece_model_type
 }
 
 task apply_sentencepiece : sentencepiece
@@ -35,5 +35,5 @@ task apply_sentencepiece : sentencepiece
   < model=$model@train_sentencepiece
   > out {
 
-  cat $in | spm_encode --model $model > $out
+  cat $in | ${sentencepiece}/build/src/spm_encode --model $model > $out
 }

@@ -100,7 +100,6 @@ task decode : sockeye
     :: test_max_sent_length=@
     :: test_beam_size=@
     :: test_batch_size=@
-    :: test_remove_bpe=@
     :: use_cpu=@
     :: .submitter=$submitter
     :: .action_flags=@
