@@ -1,8 +1,8 @@
 task binarize_data : fairseq
-    < train_src_in=$out@dummy_aggregate_bpe[DataSection:train,side:src]  # FIXME
-    < train_trg_in=$out@dummy_aggregate_bpe[DataSection:train,side:trg]  # FIXME
-    < dev_src_in=$out@dummy_aggregate_bpe[DataSection:devtest,DevtestDataSection:dev,side:src]  # FIXME
-    < dev_trg_in=$out@dummy_aggregate_bpe[DataSection:devtest,DevtestDataSection:dev,side:trg]  # FIXME
+    < train_src_in=$out@dummy_aggregate_subword[DataSection:train,side:src]  # FIXME
+    < train_trg_in=$out@dummy_aggregate_subword[DataSection:train,side:trg]  # FIXME
+    < dev_src_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:src]  # FIXME
+    < dev_trg_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:trg]  # FIXME
     > out
     :: pyenv=@
     # :: train_max_shard_size=@
@@ -183,7 +183,7 @@ task train : fairseq
 task decode : fairseq
     # < src_in=$out@apply_bpe[DataSection:devtest,DevtestDataSection:test,side:src]
     # < trg_in=$out@apply_bpe[DataSection:devtest,DevtestDataSection:test,side:trg]
-    < in=$out@dummy_aggregate_bpe[DataSection:devtest,DevtestDataSection:test,side:src]
+    < in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:test,side:src]
     < binarized_data_dir=$out@binarize_data
     < model=$out@train
     > out
