@@ -50,7 +50,7 @@ Now it's up to the machine to do the heavy-lifting. Time for a coffee!
 
 ### Get Result
 
-When the pipeline finishes running, the result of your system build should reside in `multi-bleu/Architecture.fconv_iwslt_de_en+ClipNorm.0.1+TrainSampleSize.DontSample+UseExistingTruecaser.no`. Here is what I got:
+When the pipeline finishes running, the result of your system build should reside in `multi_bleu/Architecture.fconv_iwslt_de_en+ClipNorm.0.1+MergeTest.yes+SgmDev.yes+SgmTest.yes+SubwordMethod.bpe+UseExistingTruecaser.no`. Here is what I got:
 
 ```
 > cat bleu bleu_c
