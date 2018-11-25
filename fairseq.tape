@@ -47,11 +47,21 @@ import "tapes/bleu.tape"
 # ==== pipeline ends here ====
 
 plan test {
-  reach sacrebleu, multi_bleu via (SgmDev: yes) * (SgmTest: yes) * (MergeTest: yes) * 
-    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: yes) * 
-    (DoTruecase: yes) * (SubwordMethod: bpe) * (TrainDataSource: iwslt_deen_2014) * 
-    (DevDataSource: iwslt_deen_dev2010 iwslt_deen_dev2012) * 
-    (TestDataSource: iwslt_deen_test2010 iwslt_deen_test2011 iwslt_deen_test2012) * 
+  reach sacrebleu, multi_bleu via (SgmDev: yes) * (SgmTest: yes) * (MergeTest: yes) *
+    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: yes) *
+    (DoTruecase: yes) * (SubwordMethod: bpe) * (TrainDataSource: iwslt_deen_2014) *
+    (DevDataSource: iwslt_deen_dev2010 iwslt_deen_dev2012) *
+    (TestDataSource: iwslt_deen_test2010 iwslt_deen_test2011 iwslt_deen_test2012) *
+    (Architecture: fconv_iwslt_de_en) * (ClipNorm: 0.1) * (Dropout: 0.1) * (BpeMergeOps: 49500) *
+    (TestMode: no)
+}
+
+plan cleanup {
+   reach cleanup  via (SgmDev: yes) * (SgmTest: yes) * (MergeTest: yes) *
+    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: yes) *
+    (DoTruecase: yes) * (SubwordMethod: bpe) * (TrainDataSource: iwslt_deen_2014) *
+    (DevDataSource: iwslt_deen_dev2010 iwslt_deen_dev2012) *
+    (TestDataSource: iwslt_deen_test2010 iwslt_deen_test2011 iwslt_deen_test2012) *
     (Architecture: fconv_iwslt_de_en) * (ClipNorm: 0.1) * (Dropout: 0.1) * (BpeMergeOps: 49500) *
     (TestMode: no)
 }

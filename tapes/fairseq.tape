@@ -229,3 +229,13 @@ task decode : fairseq
   CUDA_VISIBLE_DEVICES=`free-gpu` $cmd < $in > decode.log
   cat decode.log | grep ^H | cut -f3- > $out
 }
+
+task cleanup
+  < model_dir=$out@train
+  > out {
+
+    echo "remove intermediate models:" > $out
+    ls $model_dir/checkpoint[0-9]*.pt >> $out
+    rm $model_dir/checkpoint[0-9]*.pt
+}
+
