@@ -49,9 +49,9 @@ task decharacterize : tools
 # do not support merge for the moment
 task wrap_xml : mosesdecoder
     < in=$detokenized_output
-    < wrap_template=$out@download_or_link[DevtestDataSection:test,side:src]
+    < wrap_template=$out@download_or_link[DataSection:test,side:src]
     > out
-    :: trg_lang=@
+    :: trg_lang=$TRG
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
   $mosesdecoder/scripts/ems/support/wrap-xml.perl $trg_lang $wrap_template < $in > $out

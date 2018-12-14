@@ -1,11 +1,11 @@
 global {
   dev_text=(SgmDev:
-    no=$out@download_or_link[DevtestDataSection:dev]
+    no=$out@download_or_link[DataSection:dev]
     yes=(side: src=$src_out@dev_text_from_sgm trg=$trg_out@dev_text_from_sgm)
   )
 
   test_text=(SgmTest:
-    no=$out@download_or_link[DevtestDataSection:test]
+    no=$out@download_or_link[DataSection:test]
     yes=(side: src=$src_out@test_text_from_sgm trg=$trg_out@test_text_from_sgm)
   )
 
@@ -18,27 +18,14 @@ global {
     no=$out@train_truecaser[side:trg]
   )
 
-  merged_data=(MergeTest:
-    no=(DataSection:
-      train=$out@merge[DataSection:train]
-      devtest=(DevtestDataSection:
-        dev=$out@merge[DevtestDataSection:dev]
-        test=$test_text
-      )
-    )
-    yes=$out@merge
-  )
+  raw_data=$out@download_or_link
+  raw_data_test_src=$out@download_or_link[DataSection:test,side:src]
+  raw_data_test_trg=$out@download_or_link[DataSection:test,side:trg]
 
   tokenized_data=(DoTokenize:
     yes=$out@tokenize
-    no=(DataSection:
-      train=$out@dummy_aggregate_merge[DataSection:train]
-      devtest=(DevtestDataSection:
-        dev=$out@dummy_aggregate_merge[DevtestDataSection:dev]
-        test=$test_text
-      )
-    )
-  )
+    no=$out@download_or_link
+   )
 
   # don't do truecase when doing characterize
   # truecase will mess up the word boundary annotation

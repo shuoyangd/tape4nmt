@@ -16,13 +16,13 @@ func tokenize : mosesdecoder tools # stanford_seg
 }
 
 task tokenize calls tokenize : mosesdecoder tools # stanford_seg
-    < in=$out@dummy_aggregate_merge
+    < in=$raw_data
     > out
     :: Lang=(side: src=$SRC trg=$TRG)
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags
 
 task characterize : tools
-    < in=$out@tokenize  # FIXME fix test
+    < in=$out@tokenize
     > out
     :: pyenv=@
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {

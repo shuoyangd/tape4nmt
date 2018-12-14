@@ -1,7 +1,7 @@
 task dev_text_from_sgm : mosesdecoder
-    < src_in=$out@download_or_link[DataSection:devtest,DevtestDataSection:dev,side:src]
-    < trg_in=$out@download_or_link[DataSection:devtest,DevtestDataSection:dev,side:trg]
-    < wrap_template=$out@download_or_link[DataSection:devtest,DevtestDataSection:dev,side:src]
+    < src_in=$out@download_or_link[DataSection:dev,side:src]
+    < trg_in=$out@download_or_link[DataSection:dev,side:trg]
+    < wrap_template=$out@download_or_link[DataSection:dev,side:src]
     > src_out
     > trg_out {
 
@@ -19,9 +19,9 @@ task dev_text_from_sgm : mosesdecoder
 }
 
 task test_text_from_sgm : mosesdecoder
-    < src_in=$out@download_or_link[DataSection:devtest,DevtestDataSection:test,side:src]
-    < trg_in=$out@download_or_link[DataSection:devtest,DevtestDataSection:test,side:trg]
-    < wrap_template=$out@download_or_link[DataSection:devtest,DevtestDataSection:test,side:src]
+    < src_in=$out@download_or_link[DataSection:test,side:src]
+    < trg_in=$out@download_or_link[DataSection:test,side:trg]
+    < wrap_template=$out@download_or_link[DataSection:test,side:src]
     > src_out
     > trg_out {
 
