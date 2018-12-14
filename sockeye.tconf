@@ -43,7 +43,7 @@ global {
   resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g"
 
   # SGE: flags for notifying about job completion (put in your email address!)
-  action_flags="-m ae -M post@cs.jhu.edu"
+  action_flags="-m ae -M YOUR@EMAIL.ADDRESS"
 
   # The default submitter: shell (run locally) or sge (run on a grid)
   submitter=(TestMode: no="sge" yes="shell")
