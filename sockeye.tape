@@ -40,15 +40,6 @@ import "tapes/bleu.tape"
 
 # ==== pipeline ends here ====
 
-plan test {
-  reach sacrebleu via 
-    (SubwordMethod: sentencepiece) * (DoTokenize: no) * (DoTruecase: no) * 
-    (TrainDataSource: iwslt_deen_2014) * 
-    (SgmDev: yes) * (DevDataSource: iwslt_deen_dev2012) * 
-    (SgmTest: yes) * (TestDataSource: iwslt_deen_test2012_small) * 
-    (TestMode: yes)
-}
-
 # Nuts and bolts:
 global {
   ducttape_experimental_packages=true
