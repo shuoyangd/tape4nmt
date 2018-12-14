@@ -1,43 +1,21 @@
 global {
 
-  SRC=(TrainDataSource:
-    iwslt_deen_2014="de"
-  )
-  TRG=(TrainDataSource:
-    iwslt_deen_2014="en"
-  )
-  trg_lang=en  # FIXME (only used by wrap_xml, under some rare cases)
+  SRC=de
+  TRG=en
 
-  train_data=(TrainDataSource:
-    iwslt_deen_2014=(side:
-      src="/path/to/iwslt/train.tags.nourl.de-en.de"
-      trg="/path/to/iwslt/train.tags.nourl.de-en.en"
-    )
-  )
+  # IWSLT
+  train_prefix="/home/hltcoe/mpost/code/tape4nmt/iwslt/train.tags.nourl.de-en"
+  dev_prefix="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.dev2010.de-en"
+  test_prefix=(TestSet: 
+      iwslt10="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.tst2010.de-en" 
+      iwslt11="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.tst2011.de-en"
+      iwslt12="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.tst2011.de-en")
 
-  dev_data=(DevDataSource:
-    iwslt_deen_dev2010=(side:
-      src="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.en.xml"
-    )
-    iwslt_deen_dev2012=(side:
-      src="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.en.xml"
-    )
-  )
-
-  test_data=(TestDataSource:
-    iwslt_deen_test2010=(side:
-      src="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.en.xml"
-    )
-    iwslt_deen_test2011=(side:
-      src="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.en.xml"
-    )
-    iwslt_deen_test2012=(side:
-      src="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.en.xml"
-    )
-  )
+  # WMT18
+  # These are the file prefixes, to which $SRC and $TRG are appended. 
+  # You can list any number of prefixes, which will be concatenated.
+  # You can also use SacreBLEU to generate data (it will call `--echo src|ref` depending on the side).
+  # train_prefix="/export/common/data/corpora/bitext/de-en/train/commoncrawl.de-en /export/common/data/corpora/bitext/de-en/train/europarl-v7.de-en /export/common/data/corpora/bitext/de-en/train/news-commentary-v13.de-en /export/common/data/corpora/bitext/raw/wmt17/rapid2016.de-en"
+  # dev_prefix="/home/hltcoe/mpost/data/bitext/de-en/test/newstest2016.de-en /home/hltcoe/mpost/data/bitext/de-en/test/newstest2017.de-en"
+  # test_prefix="sacrebleu://wmt18 en-de"
 }

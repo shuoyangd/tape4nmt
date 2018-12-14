@@ -1,6 +1,6 @@
 task prepare_data : sockeye
-    < train_src_in=$out@dummy_aggregate_subword[DataSection:train,side:src]
-    < train_trg_in=$out@dummy_aggregate_subword[DataSection:train,side:trg]
+    < train_src_in=$prepared_data[DataSection:train,side:src]
+    < train_trg_in=$prepared_data[DataSection:train,side:trg]
     > data
     :: pyenv=@
     :: train_max_sent_length=$MaxLen
@@ -23,8 +23,8 @@ task prepare_data : sockeye
 
 task train : sockeye
     < prepared_data=$data@prepare_data
-    < dev_src=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:src]
-    < dev_trg=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:trg]
+    < dev_src=$prepared_data[DataSection:dev,side:src]
+    < dev_trg=$prepared_data[DataSection:dev,side:trg]
     > model
     :: pyenv=@
     :: train_batch_type=@
@@ -92,7 +92,7 @@ task train : sockeye
 # the target input here is used to compute naïve acc and ppl,
 # that's why we need post-bpe target input
 task decode : sockeye
-    < in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:test,side:src]
+    < in=$prepared_data[DataSection:test,side:src]
     < model=$model@train
     > out="out"
     > log="out.log"
