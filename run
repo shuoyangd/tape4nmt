@@ -2,6 +2,8 @@
 
 set -u
 
+TAPEDIR=$(dirname $0)
+
 TOOLKIT=${1:-}
 
 if [[ -z $TOOLKIT ]]; then
@@ -12,11 +14,18 @@ if [[ -z $TOOLKIT ]]; then
 fi
 shift
 
-TCONF=$TOOLKIT.tconf
-if [[ ! -e $TCONF ]]; then
-    echo "Fatal: Couldn't find $TOOLKIT.tconf"
+TAPEFILE=$TAPEDIR/$TOOLKIT.tape
+if [[ ! -e $TAPEFILE ]]; then
+    echo "Fatal: Couldn't find toolkit tape file $TAPEFILE"
     exit 1
 fi
+
+TCONF=${1:-}
+if [[ ! -e $TCONF ]]; then
+    echo "Fatal: Couldn't find $TCONF"
+    exit 1
+fi
+shift
 
 DUCTTAPE=$(which ducttape)
 if [[ $? -ne 0 ]]; then
@@ -24,4 +33,4 @@ if [[ $? -ne 0 ]]; then
    exit 1
 fi
 
-${DUCTTAPE} ${TOOLKIT}.tape -C ${TCONF} $@
+${DUCTTAPE} ${TAPEFILE} -C ${TCONF} $@
