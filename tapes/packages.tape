@@ -10,15 +10,12 @@ package sentencepiece :: .versioner=git .repo="https://github.com/google/sentenc
   make -j $(nproc)
 }
 
-package tools
-    :: .versioner=git .repo="https://github.com/shuoyangd/tape4nmt-tools" .ref=HEAD {
+package tools :: .versioner=git .repo="https://github.com/shuoyangd/tape4nmt-tools" .ref=HEAD {
   pip install -r requirements.txt
 }
 
-# using my fork for now, as fairseq evolves pretty fast
-package fairseq
-    :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=HEAD {
-
+# using a fork for now, as fairseq evolves pretty fast
+package fairseq :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=HEAD {
   python setup.py build develop
 }
 
