@@ -3,11 +3,11 @@ task train_clean : mosesdecoder
     < trg_in=$out@download_or_link[DataSection:train,side:trg]
     > src_out
     > trg_out
-    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags
     :: SRC=@
     :: TRG=@
     :: Ratio=@
-    :: MaxLen=@ {
+    :: MaxLen=@
+    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
   mkdir -p tmp
   filename=$(basename $src_in)
