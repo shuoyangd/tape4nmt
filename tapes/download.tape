@@ -1,3 +1,20 @@
+global {
+
+  raw_data=$out@download_or_link
+  raw_data_test_src=$out@download_or_link[DataSection:test,side:src]
+  raw_data_test_trg=$out@download_or_link[DataSection:test,side:trg]
+
+  dev_text=(SgmDev:
+    no=$out@download_or_link[DataSection:dev]
+    yes=(side: src=$src_out@dev_text_from_sgm trg=$trg_out@dev_text_from_sgm)
+  )
+
+  test_text=(SgmTest:
+    no=$out@download_or_link[DataSection:test]
+    yes=(side: src=$src_out@test_text_from_sgm trg=$trg_out@test_text_from_sgm)
+  )
+}
+
 task download_or_link : tools
     :: in=(DataSection: train=$train_prefix dev=$dev_prefix test=$test_prefix)
     :: side=(side: src trg)

@@ -1,3 +1,25 @@
+global {
+
+  debped_output=(SubwordMethod:
+    sentencepiece=$out@remove_sentencepiece
+    bpe=$out@debpe
+    none=$out@decode
+  )
+
+  # don't do truecase when doing characterize
+  # truecase will mess up the word boundary annotation
+  detruecased_output=(DoTruecase:
+    yes=$out@detruecase
+    no=$debped_output
+  )
+
+  detokenized_output=(DoTokenize:
+    yes=$out@detokenize
+    no=$detruecased_output
+  )
+
+}
+
 task debpe
     < in=$out@decode
     > out

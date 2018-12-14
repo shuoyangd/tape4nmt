@@ -1,3 +1,11 @@
+global {
+  prepared_data=(SubwordMethod:
+    sentencepiece=$out@apply_sentencepiece
+    bpe=$out@apply_bpe
+    none=$truecased_data
+  )
+}
+
 task train_bpe : subword_nmt
   < src_in=$tokenized_data[DataSection:train,side:src]
   < trg_in=$tokenized_data[DataSection:train,side:trg]

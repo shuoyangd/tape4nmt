@@ -1,3 +1,21 @@
+global {
+  src_truecaser=(UseExistingTruecaser:
+    yes=""
+    no=$out@train_truecaser[side:src]
+  )
+  trg_truecaser=(UseExistingTruecaser:
+    yes=""
+    no=$out@train_truecaser[side:trg]
+  )
+
+  # don't do truecase when doing characterize
+  # truecase will mess up the word boundary annotation
+  truecased_data=(DoTruecase:
+    yes=$out@truecase
+    no=$tokenized_data
+  )
+}
+
 task train_truecaser : mosesdecoder
     < src_in=$prepared_data[DataSection:train,side:src]
     < trg_in=$prepared_data[DataSection:train,side:trg]
