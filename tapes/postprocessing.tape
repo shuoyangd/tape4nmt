@@ -8,16 +8,16 @@ global {
 
   # don't do truecase when doing characterize
   # truecase will mess up the word boundary annotation
-  detruecased_output=(DoTruecase:
-    yes=$out@detruecase
-    no=$debped_output
+  detruecased_output=(Casing:
+    actual=$debped_output
+    true=$out@detruecase
+    lower_source=$debped_output
   )
 
   detokenized_output=(DoTokenize:
     yes=$out@detokenize
     no=$detruecased_output
   )
-
 }
 
 task debpe
