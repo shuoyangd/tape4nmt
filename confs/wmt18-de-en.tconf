@@ -1,0 +1,9 @@
+global {
+
+  SRC=de
+  TRG=en
+
+  train_prefix="/export/common/data/corpora/bitext/de-en/train/commoncrawl.de-en /export/common/data/corpora/bitext/de-en/train/europarl-v7.de-en /export/common/data/corpora/bitext/de-en/train/news-commentary-v13.de-en /export/common/data/corpora/bitext/raw/wmt17/rapid2016.de-en"
+  dev_prefix="sacrebleu://wmt17 de-en"
+  test_prefix="sacrebleu://wmt18 de-en"
+}

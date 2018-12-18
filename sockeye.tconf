@@ -1,4 +1,7 @@
-import "confs/data.tconf"
+
+# import "confs/data.tconf"
+# import "confs/wmt18-de-en.tconf"
+# import "confs/wmt18-de-en.tconf"
 
 global {
   ##################################################################################################

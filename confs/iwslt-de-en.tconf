@@ -1,0 +1,13 @@
+global {
+
+  SRC=de
+  TRG=en
+
+  # IWSLT
+  train_prefix="/home/hltcoe/mpost/code/tape4nmt/iwslt/train.tags.nourl.de-en"
+  dev_prefix="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.dev2010.de-en"
+  test_prefix=(TestSet: 
+      iwslt10="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.tst2010.de-en" 
+      iwslt11="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.tst2011.de-en"
+      iwslt12="/home/hltcoe/mpost/code/tape4nmt/iwslt/IWSLT14.TED.tst2011.de-en")
+}
