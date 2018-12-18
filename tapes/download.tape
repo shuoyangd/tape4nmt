@@ -33,14 +33,20 @@ task download_or_link : tools
     lang=$TRG
   fi
 
-  if [[ $in == sacrebleu://* ]]; then
-    # format: "sacrebleu://test-set langpair"
+  rm -f $out
 
-    # crazy bash notation to remove prefix
-    args=(${in##*://})
-    sacrebleu -t ${args[0]} -l ${args[1]} --echo $side > $out
-  else
-    for infile in $in; do
+  for infile in $in; do
+    if [[ $infile == sacrebleu://* ]]; then
+      # format: "sacrebleu://test-set/langpair"
+
+      # Removes the "sacrebleu://" prefix from $in
+      infile=${infile##*://}
+      # Replaces the "/" with a space (yes, really), and turn that into an array
+      args=(${infile//// })
+      # (please forgive me; I did not invent bash, I only use it..)
+
+      sacrebleu -t ${args[0]} -l ${args[1]} --echo $side >> $out
+    else
       infile="$infile.$lang"
 
       if [[ $testing == "yes" ]]; then
@@ -53,6 +59,6 @@ task download_or_link : tools
       else
         zcat -f $infile >> $out
       fi
-    done
-  fi
+    fi
+  done
 }

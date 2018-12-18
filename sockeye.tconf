@@ -101,6 +101,8 @@ plan test {
 
 plan transformer {
   reach sacrebleu via
-    (SubwordMethod: sentencepiece) * (DoTokenize: no) * (DoTruecase: no) *
-    (NumLayers: 6_6 10_2)
+    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: actual) * (NumLayers: 6_6)
+
+  reach sacrebleu via
+    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: lower_source) * (SourceFactors: no yes) * (NumLayers: 6_6)
 }
