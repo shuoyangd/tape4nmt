@@ -44,7 +44,7 @@ global {
   ##################################################################################################
 
   # SGE: flags for notifying about job completion (put in your email address!)
-  action_flags="-m ae -M post@cs.jhu.edu"
+  action_flags="-m ae -M YOUR@EMAIL.HERE"
 
   # SGE: generic job flags
   resource_flags="-l mem_free=2g"

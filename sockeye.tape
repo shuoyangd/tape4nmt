@@ -25,6 +25,9 @@ import "tapes/truecase.tape"
 # tasks related to subword processing
 import "tapes/subword.tape"
 
+# tasks related to subword processing
+import "tapes/source_factors.tape"
+
 # task binarize_data, train and decode fits in here in the execution order
 # these tasks are usually the ones that needs to be defined for each toolkit
 import "tapes/sockeye.tape"
