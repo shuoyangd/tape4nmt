@@ -2,13 +2,13 @@ global {
   prepared_data=(SubwordMethod:
     sentencepiece=$out@apply_sentencepiece
     bpe=$out@apply_bpe
-    none=$truecased_data
+    none=$recased_data
   )
 }
 
 task train_bpe : subword_nmt
-  < src_in=$tokenized_data[DataSection:train,side:src]
-  < trg_in=$tokenized_data[DataSection:train,side:trg]
+  < src_in=$recased_data[DataSection:train,side:src]
+  < trg_in=$recased_data[DataSection:train,side:trg]
   > model="bpe.model"
   :: bpe_operations=@
   :: SRC=@
@@ -20,8 +20,7 @@ task train_bpe : subword_nmt
 }
 
 task apply_bpe : subword_nmt
-    # < in=$truecased_data
-    < in=$tokenized_data
+    < in=$recased_data
     < model=$model@train_bpe
     > out
     :: pyenv=@ {
@@ -30,8 +29,8 @@ task apply_bpe : subword_nmt
 }
 
 task train_sentencepiece : sentencepiece
-  < src_in=$tokenized_data[DataSection:train,side:src]
-  < trg_in=$tokenized_data[DataSection:train,side:trg]
+  < src_in=$recased_data[DataSection:train,side:src]
+  < trg_in=$recased_data[DataSection:train,side:trg]
   > model="sp.model"
   > vocab="sp.vocab"
   :: sentencepiece_vocab_size=@
@@ -42,7 +41,7 @@ task train_sentencepiece : sentencepiece
 }
 
 task apply_sentencepiece : sentencepiece
-  < in=$tokenized_data
+  < in=$recased_data
   < model=$model@train_sentencepiece
   > out 
   :: pyenv=@ {

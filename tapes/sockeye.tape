@@ -32,6 +32,8 @@ task train : sockeye
     :: train_max_checkpoints_not_improved=@
     :: train_checkpoint_freq=@
     :: train_num_decode_and_eval=@
+    :: encoder_type=@
+    :: decoder_type=@
     :: num_layers=@
     :: model_size=@
     :: embed_size=@
@@ -52,8 +54,8 @@ task train : sockeye
     --prepared-data $prepared_data \
     --validation-source $dev_src \
     --validation-target $dev_trg \
-    --encoder=transformer \
-    --decoder=transformer \
+    --encoder=$encoder_type \
+    --decoder=$decoder_type \
     --num-layers=$num_layers \
     --transformer-model-size=$model_size \
     --transformer-attention-heads=8 \
@@ -85,9 +87,8 @@ task train : sockeye
     --batch-size=$train_batch_size \
     --checkpoint-frequency=$train_checkpoint_freq \
     --decode-and-evaluate=$train_num_decode_and_eval \
-    --keep-last-params=60
+    --keep-last-params=10
 }
-
 
 # the target input here is used to compute naïve acc and ppl,
 # that's why we need post-bpe target input

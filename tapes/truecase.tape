@@ -8,12 +8,15 @@ global {
     no=$out@train_truecaser[side:trg]
   )
 
+  # This has to be separated out from the recased_data definition, don't know why.
+  maybe_lowered=(side: src=$out@lowercase trg=$tokenized_data)
+
   # don't do truecase when doing characterize
   # truecase will mess up the word boundary annotation
-  truecased_data=(DoTruecase:
-    yes=$out@truecase
-    no=$tokenized_data
-  )
+  recased_data=(Casing:
+    actual=$tokenized_data
+    true=$out@truecase
+    lower_source=$maybe_lowered)
 }
 
 task train_truecaser : mosesdecoder
@@ -41,3 +44,12 @@ task truecase : mosesdecoder
 
   $mosesdecoder/scripts/recaser/truecase.perl -model $model < $in > $out
 }
+
+task lowercase : mosesdecoder
+  < in=$tokenized_data
+  > out
+  :: .submitter=shell {
+
+  cat $in | ${mosesdecoder}/scripts/tokenizer/lowercase.perl > $out
+}
+

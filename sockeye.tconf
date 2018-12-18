@@ -12,12 +12,17 @@ global {
   model_size=512
   embed_size="512:512"
 
+  encoder_type="transformer"
+  decoder_type="transformer"
+
   train_batch_type=(TestMode: no="word" yes="sentence")
   train_batch_size=(TestMode: no="4096" yes=8)
 
   # Sockeye
   train_checkpoint_freq=(TestMode: no=5000 yes=100)
-  train_max_checkpoints_not_improved=(TestMode: no=16 yes=0)
+  train_max_checkpoints_not_improved=(TestMode: no=5 yes=0)
+
+  # the number of sentences to use from the dev set
   train_num_decode_and_eval=(TestMode: no=500 yes=10)
 
   # TEST CONFIGURATIONS
@@ -25,10 +30,21 @@ global {
   test_batch_size=1
   test_max_sent_length=100
 
+  # SOURCE FACTORS
+  # the factors to compute
+  source_factors="bpe case"
+  # how to combine factors: "concat" or "sum"
+  source_factors_combine="sum"
+  # set to same as num_embed if using combine method "sum"
+  source_factors_num_embed="512 512"
+
 
   ##################################################################################################
   # Job submission parameters
   ##################################################################################################
+
+  # SGE: flags for notifying about job completion (put in your email address!)
+  action_flags="-m ae -M post@cs.jhu.edu"
 
   # SGE: generic job flags
   resource_flags="-l mem_free=2g"
@@ -37,13 +53,11 @@ global {
   resource_flags_16g="-l mem_free=16g"
 
   # SGE: flags for training a model
-  resource_flags_train="-q gpu.q -l gpu=1,mem_free=4g"
+  num_devices=2
+  resource_flags_train="-q gpu.q -l gpu=2,mem_free=20g"
 
   # SGE: flags for decoding
   resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g"
-
-  # SGE: flags for notifying about job completion (put in your email address!)
-  action_flags="-m ae -M YOUR@EMAIL.ADDRESS"
 
   # The default submitter: shell (run locally) or sge (run on a grid)
   submitter=(TestMode: no="sge" yes="shell")
@@ -73,13 +87,13 @@ global {
 }
 
 plan test {
-  reach sacrebleu via 
-    (SubwordMethod: sentencepiece) * (DoTokenize: no) * (DoTruecase: no) * 
+  reach multi_bleu, sacrebleu via 
+    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: *) * (SourceFactors: yes) *
     (TestMode: yes)
 
-  reach sacrebleu via 
-    (SubwordMethod: bpe) * (DoTokenize: yes) * (DoTruecase: yes no) * 
-    (TestMode: yes)
+  # reach sacrebleu via 
+  #   (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: actual) *
+  #   (TestMode: yes)
 }
 
 plan transformer {
