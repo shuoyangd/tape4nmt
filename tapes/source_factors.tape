@@ -1,6 +1,6 @@
 task compute_source_factors : sockeye_scripts
   < subword_in=$prepared_data
-  < tok_in=$recased_data
+  < tok_in=$tokenized_data
   > factor_files="factors.txt"
   :: source_factors=@
   :: .submitter=shell {
