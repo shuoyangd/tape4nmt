@@ -18,10 +18,6 @@ task prepare_data : sockeye
     source_factor_flag="--source-factors $(cat $factor_files)"
   fi
 
-  source deactivate
-  conda activate sockeye-cpu
-  echo "HOSTNAME: $(hostname)"
-
   python3 -m sockeye.prepare_data \
       --source $train_src_in \
       $source_factor_flag \
@@ -165,9 +161,6 @@ task decode : sockeye
   fi
 
   export PYTHONPATH=${sockeye}
-
-  source deactivate
-  conda activate sockeye
 
   python3 -m sockeye.translate \
     -m $model \
