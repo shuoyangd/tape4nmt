@@ -1,4 +1,3 @@
-
 # import "confs/data.tconf"
 # import "confs/wmt18-de-en.tconf"
 # import "confs/wmt18-de-en.tconf"
@@ -53,14 +52,14 @@ global {
   resource_flags="-l mem_free=2g"
 
   # SGE: larger job flags
-  resource_flags_16g="-l mem_free=16g"
+  resource_flags_16g="-l mem_free=16g,h_rt=12:00:00"
 
   # SGE: flags for training a model
   num_devices=2
-  resource_flags_train="-q gpu.q -l gpu=2,mem_free=20g"
+  resource_flags_train="-q gpu.q -l gpu=2,mem_free=20g,h_rt=168:00:00"
 
   # SGE: flags for decoding
-  resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g"
+  resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g,h_rt=4:00:00"
 
   # The default submitter: shell (run locally) or sge (run on a grid)
   submitter=(TestMode: no="sge" yes="shell")
