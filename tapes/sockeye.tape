@@ -18,6 +18,10 @@ task prepare_data : sockeye
     source_factor_flag="--source-factors $(cat $factor_files)"
   fi
 
+  source deactivate
+  conda activate sockeye-cpu
+  echo "HOSTNAME: $(hostname)"
+
   python3 -m sockeye.prepare_data \
       --source $train_src_in \
       $source_factor_flag \
@@ -52,6 +56,7 @@ task train : sockeye
     :: source_factors_num_embed=@
     :: source_factors_combine=@
     :: use_cpu=@
+    :: num_devices=@
     :: .submitter=$submitter
     :: .resource_flags=$resource_flags_train
     :: .action_flags=@ {
@@ -59,7 +64,7 @@ task train : sockeye
   if [[ $use_cpu == "yes" ]]; then
     device="--use-cpu"
   else
-    device="--device-ids $(free-gpu)"
+    device="--device-ids -$num_devices"
   fi
 
   dev_factor_flag=""
@@ -69,9 +74,13 @@ task train : sockeye
 
   export PYTHONPATH=${sockeye}
 
-  python -m sockeye.train \
+  source deactivate
+  conda activate sockeye
+
+  python3 -m sockeye.train \
     -o $model \
     $device \
+    --disable-device-locking \
     --prepared-data $prepared_data \
     --source-factors-combine $source_factors_combine \
     --num-embed=$embed_size \
@@ -112,6 +121,7 @@ task train : sockeye
     --batch-size=$train_batch_size \
     --checkpoint-frequency=$train_checkpoint_freq \
     --decode-and-evaluate=$train_num_decode_and_eval \
+    --decode-and-evaluate-use-cpu \
     --keep-last-params=10
 }
 
@@ -156,9 +166,13 @@ task decode : sockeye
 
   export PYTHONPATH=${sockeye}
 
+  source deactivate
+  conda activate sockeye
+
   python3 -m sockeye.translate \
     -m $model \
     $device \
+    --disable-device-locking \
     -i $in \
     $factor_flag \
     -o out.all \
