@@ -10,12 +10,16 @@ global {
   # All ducttape files will be written underneath this directory
   ducttape_output="out"
 
-  num_layers=(TestMode: no=(NumLayers: 6_6="6:6" 10_2="10:2") yes="1:1")
-  model_size=512
-  embed_size="512:512"
-
   encoder_type="transformer"
   decoder_type="transformer"
+
+  num_embed="512:512"
+
+  num_layers=(TestMode: no=(NumLayers: 6_6="6:6" 10_2="10:2") yes="1:1")
+
+  transformer_model_size=512
+  transformer_attention_heads=8
+  transformer_feed_forward_num_hidden=2048
 
   train_batch_type=(TestMode: no="word" yes="sentence")
   train_batch_size=(TestMode: no="4096" yes=8)
@@ -39,7 +43,6 @@ global {
   source_factors_combine="sum"
   # set to same as num_embed if using combine method "sum"
   source_factors_num_embed="512 512"
-
 
   ##################################################################################################
   # Job submission parameters

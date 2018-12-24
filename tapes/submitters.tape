@@ -78,7 +78,7 @@ EOF
     echo "echo \$? > exitcode" >> $wrapper  # saves the exit code of the inner process
 
     # Use SGE's -sync option to prevent qsub from immediately returning
-    qsub -V -S /bin/bash -sync y $wrapper
+    qsub -sync y -V -S /bin/bash $wrapper
 
     # restore the exit code saved from the inner process
     EXITCODE=$(cat $PWD/exitcode)

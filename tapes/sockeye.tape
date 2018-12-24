@@ -46,8 +46,10 @@ task train : sockeye
     :: encoder_type=@
     :: decoder_type=@
     :: num_layers=@
-    :: model_size=@
-    :: embed_size=@
+    :: num_embed=@
+    :: transformer_model_size=@
+    :: transformer_attention_heads=@    
+    :: transformer_feed_forward_num_hidden=@
     :: source_factors=@
     :: source_factors_num_embed=@
     :: source_factors_combine=@
@@ -79,7 +81,7 @@ task train : sockeye
     --disable-device-locking \
     --prepared-data $prepared_data \
     --source-factors-combine $source_factors_combine \
-    --num-embed=$embed_size \
+    --num-embed=$num_embed \
     --source-factors-num-embed $source_factors_num_embed \
     --validation-source $dev_src \
     --validation-target $dev_trg \
@@ -89,8 +91,8 @@ task train : sockeye
     --num-layers=$num_layers \
     --num-embed=$embed_size \
     --transformer-model-size=$model_size \
-    --transformer-attention-heads=8 \
-    --transformer-feed-forward-num-hidden=2048 \
+    --transformer-attention-heads=$transformer_attention_heads \
+    --transformer-feed-forward-num-hidden=$transformer_feed_forward_num_hidden \
     --transformer-positional-embedding-type=fixed \
     --transformer-preprocess=n \
     --transformer-postprocess=dr \
