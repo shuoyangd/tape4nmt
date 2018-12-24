@@ -18,7 +18,10 @@ func tokenize : mosesdecoder tools # stanford_seg
     rm -r $PWD/tmp
 
   else
-    $mosesdecoder/scripts/tokenizer/normalize-punctuation.perl -l $Lang < $in | $mosesdecoder/scripts/tokenizer/tokenizer.perl -a -l $Lang -no-escape -q > $out
+    cat $in | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
+      | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
+      | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
+      > $out
   fi
 }
 
