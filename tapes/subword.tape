@@ -14,7 +14,7 @@ task train_bpe : subword_nmt
   :: SRC=@
   :: TRG=@
   :: pyenv=@
-  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16g {
 
   subword-nmt learn-joint-bpe-and-vocab -i $src_in $trg_in -s $bpe_operations -o $model --write-vocabulary bpe.vocab.$SRC bpe.vocab.$TRG -v 2> log
 }
