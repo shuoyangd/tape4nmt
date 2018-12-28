@@ -128,9 +128,10 @@ task train : sockeye
 task package_model : sockeye mosesdecoder
   < in=$raw_data[DataSection:test,side:src]
   < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
-  < caser=(Casing: actual="/dev/null" true=$out@train_truecaser lower_source="lower")
+  < casing_model=(Casing: actual="/dev/null" true=$out@train_truecaser lower_source="/dev/null")
   < model=$model@train
   > bundle="bundle"
+  :: casing=(Casing: actual true lower_source)
   :: tokenize=(DoTokenize: yes="yes" no="no")
   :: subword_method=(SubwordMethod: sentencepiece bpe none)
   :: SRC=@
@@ -161,6 +162,14 @@ task package_model : sockeye mosesdecoder
     cp -a ${mosesdecoder}/scripts/tokenizer/* tokenizer
     cp -a ${mosesdecoder}/scripts/share .
     pre_cmd="\$rundir/tokenizer/normalize-punctuation.perl -l \$lang | \$rundir/tokenizer/remove-non-printing-char.perl | \$rundir/tokenizer/tokenizer.perl -l \$lang -no-escape -protected \$rundir/tokenizer/basic-protected-patterns -q"
+  fi
+
+  if [[ $casing == "lower_source" ]]; then
+    pre_cmd+=" | \$rundir/tokenizer/lowercase.perl"
+  elif [[ $casing == "true" ]]; then
+    cp -a ${mosesdecoder}/scripts/recaser .
+    cp ${casing_model} truecase.model
+    pre_cmd+=" | \$rundir/recaser/truecase.perl -model \$rundir/truecase.model"
   fi
 
   if [[ $subword_method == "sentencepiece" ]]; then
