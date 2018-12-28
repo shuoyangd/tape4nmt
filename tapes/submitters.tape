@@ -74,6 +74,18 @@ EOF
     # The current working directory will also be changed by most schedulers
     echo "cd $PWD" >> $wrapper
 
+    echo >> $wrapper
+    echo "echo \"HOSTNAME: \$(hostname)\"" >> $wrapper
+    echo "echo" >> $wrapper
+    echo "echo CUDA in ENV:" >> $wrapper
+    echo "env | grep CUDA" >> $wrapper
+    echo "env | grep SGE" >> $wrapper
+    echo "echo" >> $wrapper
+    echo "echo Setting CUDA_VISIBLE_DEVICES=\${SGE_HGR_gpu:-}" >> $wrapper
+    echo "export CUDA_VISIBLE_DEVICES=\$(echo \${SGE_HGR_gpu:-} | perl -pe 's/ /,/g')" >> $wrapper
+    echo "env | grep CUDA" >> $wrapper
+    echo >> $wrapper
+
     echo "$COMMANDS" >> $wrapper
     echo "echo \$? > exitcode" >> $wrapper  # saves the exit code of the inner process
 
