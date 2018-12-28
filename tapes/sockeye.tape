@@ -125,12 +125,107 @@ task train : sockeye
 
 # Takes all the data and builds a packaged model directory.
 # Ideally this should be used for evaluation.
-task package_model : sockeye
+task package_model : sockeye mosesdecoder
   < in=$raw_data[DataSection:test,side:src]
-  > out
+  < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
+  < caser=(Casing: actual="/dev/null" true=$out@train_truecaser lower_source="lower")
+  < model=$model@train
+  > bundle="bundle"
+  :: tokenize=(DoTokenize: yes="yes" no="no")
+  :: subword_method=(SubwordMethod: sentencepiece bpe none)
+  :: SRC=@
+  :: TRG=@
   :: .submitter=shell {
 
-  # TODO
+  mkdir bundle
+  cd bundle
+  cp -a ${sockeye} sockeye
+
+  ## Pre-processing and post-processing
+  rm -f pre.sh
+  echo "#!/usr/bin/env bash" >> pre.sh
+  echo >> pre.sh
+  echo "lang=\${1:-$SRC}" >> pre.sh
+  echo "rundir=\$(dirname \$0)" >> pre.sh
+
+  rm -f post.sh
+  echo "#!/usr/bin/env bash" >> post.sh
+  echo >> post.sh
+  echo "lang=\${1:-$TRG}" >> post.sh
+  echo "rundir=\$(dirname \$0)" >> post.sh
+
+  pre_cmd="cat"
+  post_cmd="cat"
+  if [[ $tokenize == "yes" ]]; then
+    mkdir tokenizer
+    cp -a ${mosesdecoder}/scripts/tokenizer/* tokenizer
+    cp -a ${mosesdecoder}/scripts/share .
+    pre_cmd="\$rundir/tokenizer/normalize-punctuation.perl -l \$lang | \$rundir/tokenizer/remove-non-printing-char.perl | \$rundir/tokenizer/tokenizer.perl -l \$lang -no-escape -protected \$rundir/tokenizer/basic-protected-patterns -q"
+  fi
+
+  if [[ $subword_method == "sentencepiece" ]]; then
+    mkdir bin
+    cp ${sentencepiece}/build/src/spm_{encode,decode} bin
+    cp $subword_model .
+    pre_cmd+=" | \$rundir/bin/spm_encode --model \$rundir/$subword_model"
+    post_cmd+=" | \$rundir/bin/spm_decode --model \$rundir/$subword_model"
+  elif [[ $subword_method == "bpe" ]]; then
+    cp $subword_model bpe.model
+    pre_cmd+=" | subword-nmt apply-bpe -c \$rundir/bpe.model"
+    post_cmd+=" | perl -pe 's/@@( |\$)//g'"
+  fi
+
+  if [[ $tokenize == "yes" ]]; then
+    cp ${mosesdecoder}/scripts/tokenizer/detokenizer.perl moses
+    post_cmd+=" | \$rundir/tokenizer/detokenizer.perl -q -l \$lang"
+  fi
+
+  echo $pre_cmd >> pre.sh
+  echo $post_cmd >> post.sh
+
+  ## Translate
+  cp -a ${model} sockeye_model
+  echo "#!/usr/bin/env bash" >> translate.sh
+  echo "" >> translate.sh
+  echo "bundledir=\$(dirname \$0)" >> translate.sh
+  echo "" >> translate.sh
+  echo "export PYTHONPATH=\$bundledir/sockeye" >> translate.sh
+  echo "\$bundledir/pre.sh ${SRC} | python3 -m sockeye.translate -m \$bundledir/sockeye_model \"\$@\" | \$bundledir/post.sh" >> translate.sh
+
+  # permissions
+  chmod 755 pre.sh post.sh translate.sh
+}
+
+task decode_with_bundle : sockeye
+    < in=$raw_data_test_src
+    < bundled_model=$bundle@package_model
+    > out="out"
+    > log="out.log"
+    > scores="out.scores"
+    :: test_max_sent_length=@
+    :: test_beam_size=@
+    :: test_batch_size=@
+    :: use_cpu=@
+    :: .submitter=$submitter
+    :: .action_flags=@
+    :: .resource_flags=$resource_flags_decode
+    :: pyenv=@ {
+
+  if [[ $use_cpu == "yes" ]]; then
+    device_flag="--use-cpu"
+  else
+    device_flag="--device-ids -1"
+  fi
+
+  cat $in | ${bundled_model}/translate.sh \
+    $device_flag \
+    --output-type translation_with_score \
+    --beam-size $test_beam_size \
+    --batch-size $test_batch_size \
+    --max-input-len $test_max_sent_length \
+    > out.all 2> $log
+
+    cat out.all | unpaste $scores $out
 }
 
 # the target input here is used to compute naïve acc and ppl,
