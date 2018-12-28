@@ -152,9 +152,9 @@ task decode : sockeye
     :: pyenv=@ {
 
   if [[ $use_cpu == "yes" ]]; then
-    device="--use-cpu"
+    device_flag="--use-cpu"
   else
-    device="--device-ids $(free-gpu)"
+    device_flag="--device-ids -1"
   fi
 
   factor_flag=""
@@ -166,7 +166,7 @@ task decode : sockeye
 
   python3 -m sockeye.translate \
     -m $model \
-    $device \
+    $device_flag \
     --disable-device-locking \
     -i $in \
     $factor_flag \
