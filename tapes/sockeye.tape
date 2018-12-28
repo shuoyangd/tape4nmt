@@ -228,6 +228,7 @@ task decode_with_bundle : sockeye
 
   cat $in | ${bundled_model}/translate.sh \
     $device_flag \
+    --disable-device-locking \
     --output-type translation_with_score \
     --beam-size $test_beam_size \
     --batch-size $test_batch_size \
