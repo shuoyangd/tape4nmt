@@ -4,6 +4,6 @@ global {
   TRG=de
 
   train_prefix="/export/common/data/corpora/bitext/de-en/train/commoncrawl.de-en /export/common/data/corpora/bitext/de-en/train/europarl-v7.de-en /export/common/data/corpora/bitext/de-en/train/news-commentary-v13.de-en /export/common/data/corpora/bitext/raw/wmt17/rapid2016.de-en"
-  dev_prefix="sacrebleu://wmt16/en-de sacrebleu://wmt17/en-de"
-  test_prefix="sacrebleu://wmt18/en-de"
+  dev_prefix="sacrebleu://wmt16 sacrebleu://wmt17"
+  test_prefix="sacrebleu://wmt18"
 }

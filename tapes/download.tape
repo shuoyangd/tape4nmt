@@ -37,15 +37,11 @@ task download_or_link : tools
 
   for infile in $in; do
     if [[ $infile == sacrebleu://* ]]; then
-      # format: "sacrebleu://test-set/langpair"
+      # format: "sacrebleu://test-set" (language pair taken from $SRC and $TRG)
 
       # Removes the "sacrebleu://" prefix from $in
-      infile=${infile##*://}
-      # Replaces the "/" with a space (yes, really), and turn that into an array
-      args=(${infile//// })
-      # (please forgive me; I did not invent bash, I only use it..)
-
-      sacrebleu -t ${args[0]} -l ${args[1]} --echo $side >> $out
+      test_set=${infile##*://}
+      sacrebleu -t ${test_set} -l ${SRC}-${TRG} --echo $side >> $out
     else
       infile="$infile.$lang"
 
