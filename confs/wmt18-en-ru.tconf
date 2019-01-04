@@ -1,0 +1,9 @@
+global {
+
+  SRC=en
+  TRG=ru
+
+  train_prefix="/export/projects/SCALE/2016/mt/parallel/ru/train/commoncrawl.ru-en /export/common/data/corpora/bitext/ru-en/train/news-commentary-v13.ru-en /export/projects/SCALE/2016/mt/parallel/ru/train/yandex.1m /export/common/data/corpora/bitext/ru-en/train/UNv1.0.6way /export/common/data/corpora/bitext/ru-en/train/wiki.ru-en /export/common/data/corpora/bitext/ru-en/train/guessed-names.ru-en /export/common/data/corpora/bitext/ru-en/train/guessed-patronymic-names.ru-en"
+  dev_prefix="sacrebleu://wmt16 sacrebleu://wmt17"
+  test_prefix="sacrebleu://wmt18"
+}

@@ -1,6 +1,10 @@
-# import "confs/data.tconf"
+# Define the data sets and language pair.
+# Choose one of the following files, or simply paste the contents here.
+
 # import "confs/wmt18-de-en.tconf"
 # import "confs/wmt18-en-de.tconf"
+# import "confs/wmt18-ru-en.tconf"
+# import "confs/wmt18-en-ru.tconf"
 
 global {
   ##################################################################################################
