@@ -10,19 +10,11 @@ func tokenize : mosesdecoder tools # stanford_seg
     > out
     :: Lang {
 
-  # segmentation for chinese
-  if [ $Lang == "zh" ] || [ $Lang == "chn" ] || [ $Lang == "cn" ] ; then
-
-    mkdir -p $PWD/tmp
-    $stanford_seg/segmentstd.sh $stanford_seg/segment.sh $PWD/tmp ctb UTF-8 0 < $in | $mosesdecoder/scripts/tokenizer/escape-special-chars.perl | $tools/chinese-punctuations-utf8.perl > $out
-    rm -r $PWD/tmp
-
-  else
-    cat $in | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
-      | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
-      | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
-      > $out
-  fi
+  cat $in | perl -C31 -pe 's/(\p{Han})/ \1 /g'  \
+    | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
+    | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
+    | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
+    > $out
 }
 
 task tokenize calls tokenize : mosesdecoder tools # stanford_seg
