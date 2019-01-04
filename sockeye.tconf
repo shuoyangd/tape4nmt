@@ -1,6 +1,6 @@
 # import "confs/data.tconf"
 # import "confs/wmt18-de-en.tconf"
-# import "confs/wmt18-de-en.tconf"
+# import "confs/wmt18-en-de.tconf"
 
 global {
   ##################################################################################################
@@ -33,7 +33,7 @@ global {
 
   # TEST CONFIGURATIONS
   test_beam_size=(TestMode: no="12" yes="1")
-  test_batch_size=1
+  test_batch_size=5
   test_max_sent_length=100
 
   # SOURCE FACTORS

@@ -89,8 +89,7 @@ task train : sockeye
     --encoder=$encoder_type \
     --decoder=$decoder_type \
     --num-layers=$num_layers \
-    --num-embed=$embed_size \
-    --transformer-model-size=$model_size \
+    --transformer-model-size=$transformer_model_size \
     --transformer-attention-heads=$transformer_attention_heads \
     --transformer-feed-forward-num-hidden=$transformer_feed_forward_num_hidden \
     --transformer-positional-embedding-type=fixed \
