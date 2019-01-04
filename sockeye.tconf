@@ -56,7 +56,7 @@ global {
   action_flags="-m ae -M YOUR@EMAIL.HERE"
 
   # SGE: generic job flags
-  resource_flags="-l mem_free=2g"
+  resource_flags="-l mem_free=2g,h_rt=12:00:00"
 
   # SGE: larger job flags
   resource_flags_16g="-l mem_free=16g,h_rt=12:00:00"
