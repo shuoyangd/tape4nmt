@@ -5,16 +5,24 @@ global {
    )
 }
 
-func tokenize : mosesdecoder tools # stanford_seg
+func tokenize : mosesdecoder tools sockeye_scripts # stanford_seg
     < in
     > out
     :: Lang {
 
-  cat $in | perl -C31 -pe 's/(\p{Han})/ \1 /g'  \
-    | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
-    | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
-    | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
-    > $out
+  if [[ $Lang == "zh" ]]; then
+    cat $in | ${sockeye_scripts}/zh/segment-chinese.pl \
+      | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
+      | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
+      | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
+      > $out
+  else
+    cat $in \
+      | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
+      | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
+      | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
+      > $out
+  fi
 }
 
 task tokenize calls tokenize : mosesdecoder tools # stanford_seg

@@ -124,7 +124,7 @@ task train : sockeye
 
 # Takes all the data and builds a packaged model directory.
 # Ideally this should be used for evaluation.
-task package_model : sockeye mosesdecoder
+task package_model : sockeye mosesdecoder sockeye_scripts
   < in=$raw_data[DataSection:test,side:src]
   < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
   < casing_model=(Casing: actual="/dev/null" true=$out@train_truecaser lower_source="/dev/null")
@@ -158,9 +158,15 @@ task package_model : sockeye mosesdecoder
   post_cmd="cat"
   if [[ $tokenize == "yes" ]]; then
     mkdir tokenizer
-    cp -a ${mosesdecoder}/scripts/tokenizer/* tokenizer
+    cp -a ${mosesdecoder}/scripts/tokenizer/* tokenizer/
     cp -a ${mosesdecoder}/scripts/share .
-    pre_cmd="\$rundir/tokenizer/normalize-punctuation.perl -l \$lang | \$rundir/tokenizer/remove-non-printing-char.perl | \$rundir/tokenizer/tokenizer.perl -l \$lang -no-escape -protected \$rundir/tokenizer/basic-protected-patterns -q"
+
+    if [[ $SRC == "zh" ]]; then
+      cp ${sockeye_scripts/zh/segment-chinese.pl tokenizer/
+      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.pl"
+    fi
+
+    pre_cmd+=" | \$rundir/tokenizer/normalize-punctuation.perl -l \$lang | \$rundir/tokenizer/remove-non-printing-char.perl | \$rundir/tokenizer/tokenizer.perl -l \$lang -no-escape -protected \$rundir/tokenizer/basic-protected-patterns -q"
   fi
 
   if [[ $casing == "lower_source" ]]; then
