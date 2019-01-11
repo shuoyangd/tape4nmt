@@ -10,6 +10,7 @@ submitter shell :: COMMANDS TASK_VARIABLES {
       if [[ $virtualenv == conda:* ]]; then
         . /opt/anaconda3/etc/profile.d/conda.sh
         target=$(echo $virtualenv | cut -d: -f2-)
+        source deactivate
         conda activate $target
       else
         source $virtualenv
@@ -32,56 +33,64 @@ submitter sge :: action_flags
               :: COMMANDS
               :: TASK REALIZATION TASK_VARIABLES CONFIGURATION {
   action run {
-    wrapper="ducttape_job.sh"
+    wrapper="ducttape_sge_job.sh"
+    echo "#!/usr/bin/env bash" >> $wrapper
+    echo "" >> $wrapper
     echo "#$ $resource_flags" >> $wrapper
     echo "#$ $action_flags" >> $wrapper
     echo "#$ -j y" >> $wrapper
     echo "#$ -o localhost:$PWD/job.out" >> $wrapper
     echo "#$ -N $CONFIGURATION-$TASK-$REALIZATION" >> $wrapper
+    echo "" >> $wrapper
 
     # Bash flags aren't necessarily passed into the scheduler
     # so we must re-initialize them
 
-    # these two doesn't work well with virtualenv ...
-    # echo "set -e # stop on errors" >> $wrapper
-    # echo "set -u # stop on undeclared variables" >> $wrapper
-
-    echo >> $wrapper
-    echo ". ~/.bashrc" >> $wrapper
-    echo >> $wrapper
-
-    echo "set -o pipefail # stop on pipeline errors" >> $wrapper
-    echo "set -x # show each command as it is executed" >> $wrapper
-    echo "${TASK_VARIABLES[@]}" | grep -v "resource_flags" | grep -v "action_flags" >> $wrapper
+    echo "set -euo pipefail" >> $wrapper
+    echo "" >> $wrapper
+    echo "$TASK_VARIABLES" | perl -pe 's/=/="/; s/$/"/' >> $wrapper
 
     # Setup the virtual environment
     cat >> $wrapper <<EOF
 
-    set +u  # needed to fix a virtualenv bug
-    if [[ ! -z \${pyenv:-} ]]; then
-      virtualenv=\$pyenv
+set +u  # needed to fix a virtualenv bug
+if [[ ! -z \${pyenv:-} ]]; then
+  virtualenv=\$pyenv
 
-      # Load the environment
-      if [[ \$virtualenv == conda:* ]]; then
-        . /opt/anaconda3/etc/profile.d/conda.sh
-        target=\$(echo \$virtualenv | cut -d: -f2-)
-        conda activate \$target
-      else
-        source \$virtualenv
-      fi
-    fi
-    set -u
+  # Load the environment
+  if [[ \$virtualenv == conda:* ]]; then
+    . /opt/anaconda3/etc/profile.d/conda.sh
+    target=\$(echo \$virtualenv | cut -d: -f2-)
+    source deactivate
+    conda activate \$target
+  else
+    source \$virtualenv
+  fi
+fi
+set -u
 
 EOF
 
     # The current working directory will also be changed by most schedulers
     echo "cd $PWD" >> $wrapper
 
+    echo >> $wrapper
+    echo "echo \"HOSTNAME: \$(hostname)\"" >> $wrapper
+    echo "echo" >> $wrapper
+    echo "echo CUDA in ENV:" >> $wrapper
+    echo "env | grep CUDA" >> $wrapper
+    echo "env | grep SGE" >> $wrapper
+    echo "echo" >> $wrapper
+    echo "echo Setting CUDA_VISIBLE_DEVICES=\${SGE_HGR_gpu:-}" >> $wrapper
+    echo "export CUDA_VISIBLE_DEVICES=\$(echo \${SGE_HGR_gpu:-} | perl -pe 's/ /,/g')" >> $wrapper
+    echo "env | grep CUDA" >> $wrapper
+    echo >> $wrapper
+
     echo "$COMMANDS" >> $wrapper
     echo "echo \$? > exitcode" >> $wrapper  # saves the exit code of the inner process
 
     # Use SGE's -sync option to prevent qsub from immediately returning
-    qsub -V -S /bin/bash -sync y $wrapper
+    qsub -sync y -V -S /bin/bash $wrapper
 
     # restore the exit code saved from the inner process
     EXITCODE=$(cat $PWD/exitcode)
