@@ -1,43 +1,38 @@
 global {
 
   SRC=(TrainDataSource:
-    iwslt_deen_2014="de"
+    wmt_deen_2017="de"
+    wmt_deen_2018="de"
   )
   TRG=(TrainDataSource:
-    iwslt_deen_2014="en"
+    wmt_deen_2017="en"
+    wmt_deen_2018="en"
   )
   trg_lang=en  # FIXME (only used by wrap_xml, under some rare cases)
 
   train_data=(TrainDataSource:
-    iwslt_deen_2014=(side:
-      src="/path/to/iwslt/train.tags.nourl.de-en.de"
-      trg="/path/to/iwslt/train.tags.nourl.de-en.en"
+    wmt_deen_2017=(side:
+      src="/home/pkoehn/experiment/nmt18-de-en/data/wmt17-parallel.tc.de"
+      trg="/home/pkoehn/experiment/nmt18-de-en/data/wmt17-parallel.tc.en"
+    )
+    wmt_deen_2018=(side:
+      src="/home/pkoehn/experiment/nmt18-de-en/data/wmt18-parallel-wo-paracrawl.tc.de"
+      trg="/home/pkoehn/experiment/nmt18-de-en/data/wmt18-parallel-wo-paracrawl.tc.en"
     )
   )
 
   dev_data=(DevDataSource:
-    iwslt_deen_dev2010=(side:
-      src="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.en.xml"
-    )
-    iwslt_deen_dev2012=(side:
-      src="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.en.xml"
+    newstest_deen_2016=(side:
+      src="/home/pkoehn/experiment/nmt18-de-en/data/newstest2016.de.tc"
+      trg="/home/pkoehn/experiment/nmt18-de-en/data/newstest2016.en.tc"
     )
   )
 
   test_data=(TestDataSource:
-    iwslt_deen_test2010=(side:
-      src="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.en.xml"
-    )
-    iwslt_deen_test2011=(side:
-      src="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.en.xml"
-    )
-    iwslt_deen_test2012=(side:
-      src="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.de.xml"
-      trg="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.en.xml"
+    newstest_deen_2017=(side:
+      src="/home/pkoehn/experiment/nmt18-de-en/data/newstest2017.de.tc"
+      trg="/home/pkoehn/experiment/nmt18-de-en/data/newstest2017.en.tc"
     )
   )
+
 }

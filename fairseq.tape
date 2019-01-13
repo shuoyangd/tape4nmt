@@ -47,12 +47,23 @@ import "tapes/bleu.tape"
 # ==== pipeline ends here ====
 
 plan test {
-  reach sacrebleu, multi_bleu via (SgmDev: yes) * (SgmTest: yes) * (MergeTest: yes) *
-    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: yes) *
-    (DoTruecase: yes) * (SubwordMethod: bpe) * (TrainDataSource: iwslt_deen_2014) *
-    (DevDataSource: iwslt_deen_dev2010 iwslt_deen_dev2012) *
-    (TestDataSource: iwslt_deen_test2010 iwslt_deen_test2011 iwslt_deen_test2012) *
-    (Architecture: fconv_iwslt_de_en) * (ClipNorm: 0.1) * (Dropout: 0.1) * (BpeMergeOps: 49500) *
+  reach sacrebleu, multi_bleu via (SgmDev: no) * (SgmTest: no) * (MergeTest: no) *
+    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: no) *
+    (DoTruecase: no) * (SubwordMethod: sentencepiece) * (TrainDataSource: wmt_deen_2018) *
+    (DevDataSource: newstest_deen_2016) *
+    (TestDataSource: newstest_deen_2017) *
+    (Architecture: fconv_wmt_en_de) * (ClipNorm: 0.1) * (Dropout: 0.1) *
+    (LrScheduler: Default) * (WarmUpLr: Default) * (WarmUpUpdates: Default) * (Criterion: CE) *
+    (LabelSmoothing: Default) * (WeightDecay: Default) * (UpdateFreq: Default) *
+    (TestMode: no)
+  reach sacrebleu, multi_bleu via (SgmDev: no) * (SgmTest: no) * (MergeTest: no) *
+    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: no) *
+    (DoTruecase: no) * (SubwordMethod: sentencepiece) * (TrainDataSource: wmt_deen_2018) *
+    (DevDataSource: newstest_deen_2016) *
+    (TestDataSource: newstest_deen_2017) *
+    (Architecture: transformer_wmt_en_de) * (ClipNorm: 0.0) * (Dropout: 0.1) *
+    (LrScheduler: InvSqrt) * (WarmUpLr: Transformer) * (WarmUpUpdates: Transformer) * (Criterion: LabelSmoothedCE) *
+    (LabelSmoothing: Transformer) * (WeightDecay: Transformer) * (UpdateFreq: Transformer) *
     (TestMode: no)
 }
 

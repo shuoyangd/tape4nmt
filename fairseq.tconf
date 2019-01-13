@@ -19,26 +19,25 @@ global {
   train_optim="adam"
   train_dropout=(Dropout: 0.1 0.3 0.5)
   train_lr="0.001"
-  # train_lr_min="1e-8"
-  train_lr_min=""
+  train_lr_min="9e-8"
+  # train_lr_min=""
   train_lr_shrink="0.5"
-  # train_lr_scheduler="inverse_sqrt"
-  # train_warmup_init_lr="1e-07"
-  # train_warmup_updates="4000"
-  # train_criterion="label_smoothed_cross_entropy"
-  # train_label_smoothing="0.1"
-  train_lr_scheduler=""
-  train_warmup_init_lr=""
-  train_warmup_updates=""
-  train_criterion=""
-  train_label_smoothing=""
+  train_lr_scheduler=(LrScheduler: Default="" InvSqrt="inverse_sqrt")
+  train_warmup_init_lr=(WarmUpLr: Default="" Transformer="1e-07")
+  train_warmup_updates=(WarmUpUpdates: Default="" Transformer="4000")
+  train_criterion=(Criterion: CE="" LabelSmoothedCE="label_smoothed_cross_entropy")
+  train_label_smoothing=(LabelSmoothing: Default="" Transformer="0.1")
   train_clip_norm=(ClipNorm: 0.0 0.1 0.5 1 5)
   train_max_tokens="4000"
-  train_arch=(Architecture: conv="fconv" transformer="transformer" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en")
+  train_max_epochs=""
+  train_weight_decay=(WeightDecay: Default="" Transformer="0.0")
+  train_update_freq=(UpdateFreq: Default="" Transformer="16")
+  train_seed="2"
+  train_arch=(Architecture: conv="fconv" transformer="transformer" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en" transformer_wmt_en_de="transformer_wmt_en_de" fconv_wmt_en_de="fconv_wmt_en_de")
   train_share_input_output_embed=""
   train_skip_invalid_size_inputs_valid_test="yes"
   train_adam_beta1="0.9"
-  train_adam_beta2="0.999"
+  train_adam_beta2="0.98"
 
   # TEST CONFIGURATIONS
   test_model_selection_strategy="acc"
@@ -65,7 +64,7 @@ global {
   resource_flags_decode="-q g.q -l gpu=1,mem_free=4g"
 
   # SGE: flags for notifying about job completion (put in your email address!)
-  action_flags="-m ae -M YOUR_EMAIL_HERE"
+  action_flags="-m ae -M dings@jhu.edu"
 
   # The default submitter: shell (run locally) or sge (run on a grid)
   submitter=(TestMode: no="sge" yes="shell")
@@ -74,7 +73,8 @@ global {
   # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
   # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
   # the path to the script that should be loaded.
-  pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+  # pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+  pyenv="/home/shuoyangd/pyenv/py3t4/bin/activate"
 
   ##################################################################################################
   # Preprocessing options

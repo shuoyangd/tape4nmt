@@ -53,6 +53,10 @@ task train : fairseq
     :: train_label_smoothing=@
     :: train_clip_norm=@
     :: train_max_tokens=@
+    :: train_max_epochs=@
+    :: train_weight_decay=@
+    :: train_update_freq=@
+    :: train_seed=@
     # :: train_encoder_type=@
     :: train_arch=@
     :: train_share_input_output_embed=@
@@ -114,6 +118,22 @@ task train : fairseq
 
   if [ ! -z $train_max_tokens ] ; then
     cmd=$cmd" --max-tokens $train_max_tokens"
+  fi
+
+  if [ ! -z $train_max_epochs ] ; then
+   cmd=$cmd" --max-epoch $train_max_epochs"
+  fi
+
+  if [ ! -z $train_weight_decay ] ; then
+   cmd=$cmd" --weight-decay $train_weight_decay"
+  fi
+
+  if [ ! -z $train_update_freq ] ; then
+   cmd=$cmd" --update-freq $train_update_freq"
+  fi
+
+  if [ ! -z $train_seed ] ; then
+   cmd=$cmd" --seed $train_seed"
   fi
 
   if [ ! -z $train_adam_beta1 ] && [ ! -z $train_adam_beta2 ] ; then
