@@ -13,14 +13,14 @@ task prepare_data : sockeye
 
   export PYTHONPATH=${sockeye}
 
-  source_factor_flag=""
+  source_factors_flag=""
   if [[ $factor_files != "/dev/null" ]]; then
-    source_factor_flag="--source-factors $(cat $factor_files)"
+    source_factors_flag="--source-factors $(cat $factor_files)"
   fi
 
   python3 -m sockeye.prepare_data \
       --source $train_src_in \
-      $source_factor_flag \
+      $source_factors_flag \
       --target $train_trg_in \
       --shared-vocab \
       --word-min-count 2:2 \
@@ -38,6 +38,7 @@ task train : sockeye
     < dev_factor_files=(SourceFactors: no="/dev/null" yes=$factor_files@compute_source_factors[DataSection:dev])
     > model
     :: pyenv=@
+    :: use_source_factors=(SourceFactors: no yes)
     :: train_batch_type=@
     :: train_batch_size=@
     :: train_max_checkpoints_not_improved=@
@@ -65,9 +66,11 @@ task train : sockeye
     device="--device-ids -$num_devices"
   fi
 
-  dev_factor_flag=""
-  if [[ $dev_factor_files != "/dev/null" ]]; then
-    dev_factor_flag="--validation-source-factors $(cat $dev_factor_files)"
+  dev_factors_flag=""
+  source_factors_flag=""
+  if [[ $use_source_factors ]]; then
+    dev_factors_flag="--validation-source-factors $(cat $dev_factor_files)"
+    source_factors_flag="--source-factors-num-embed $source_factors_num_embed --source-factors-combine $source_factors_combine"
   fi
 
   export PYTHONPATH=${sockeye}
@@ -80,12 +83,11 @@ task train : sockeye
     $device \
     --disable-device-locking \
     --prepared-data $prepared_data \
-    --source-factors-combine $source_factors_combine \
     --num-embed=$num_embed \
-    --source-factors-num-embed $source_factors_num_embed \
+    $source_factors_flag \
     --validation-source $dev_src \
     --validation-target $dev_trg \
-    $dev_factor_flag \
+    $dev_factors_flag \
     --encoder=$encoder_type \
     --decoder=$decoder_type \
     --num-layers=$num_layers \
@@ -130,6 +132,7 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   < casing_model=(Casing: actual="/dev/null" true=$out@train_truecaser lower_source="/dev/null")
   < model=$model@train
   > bundle="bundle"
+  :: factors=(SourceFactors: no yes)
   :: casing=(Casing: actual true lower_source)
   :: tokenize=(DoTokenize: yes="yes" no="no")
   :: subword_method=(SubwordMethod: sentencepiece bpe none)
