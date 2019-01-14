@@ -68,7 +68,7 @@ task train : sockeye
 
   dev_factors_flag=""
   source_factors_flag=""
-  if [[ $use_source_factors ]]; then
+  if [[ $use_source_factors == "yes" ]]; then
     dev_factors_flag="--validation-source-factors $(cat $dev_factor_files)"
     source_factors_flag="--source-factors-num-embed $source_factors_num_embed --source-factors-combine $source_factors_combine"
   fi
