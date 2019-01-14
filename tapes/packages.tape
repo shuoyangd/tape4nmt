@@ -1,9 +1,9 @@
-package sockeye :: .versioner=git .repo="/home/hltcoe/mpost/code/sockeye" .ref=HEAD { }
+package sockeye :: .versioner=git .repo="https://github.com/mjpost/sockeye" .ref=HEAD { }
 package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.2.12" { }
 package subword_nmt :: .versioner=pip .package="subword-nmt" .tag="0.3.5" { }
 package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD { }
 
-package sockeye_scripts :: .versioner=git .repo="/home/hltcoe/mpost/code/sockeye-scripts" .ref=HEAD { }
+package sockeye_scripts :: .versioner=git .repo="https://github.com/mjpost/sockeye-scripts" .ref=HEAD { }
 
 package sentencepiece :: .versioner=git .repo="https://github.com/google/sentencepiece" .ref="tags/v0.1.5" {  # v0.1.6 throws segfault
   mkdir build
