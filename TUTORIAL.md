@@ -34,8 +34,10 @@ Usually you'll have to modify [main.tape](https://github.com/shuoyangd/tape4nmt/
 Once you are ready, run:
 
 ```
-ducttape main.tape -C main.tconf
+./run sockeye sockeye.tconf -p transformer -j 10
 ```
+
+This will run ducttape using Sockeye with the plans defined in sockeye.tconf, executing the "transformer" plan with 10 tasks allowed at a time.
 
 You should see things spinnng up. The system build will take ~2hrs depending on your machine.
 
