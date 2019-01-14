@@ -75,9 +75,6 @@ task train : sockeye
 
   export PYTHONPATH=${sockeye}
 
-  source deactivate
-  conda activate sockeye
-
   python3 -m sockeye.train \
     -o $model \
     $device \
