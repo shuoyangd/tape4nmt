@@ -26,7 +26,7 @@ func tokenize : mosesdecoder tools sockeye_scripts # stanford_seg
 }
 
 task tokenize calls tokenize : mosesdecoder tools # stanford_seg
-    < in=$raw_data
+    < in=$masked_data
     > out
     :: Lang=(side: src=$SRC trg=$TRG)
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags

@@ -33,7 +33,8 @@ task multi_bleu : mosesdecoder
 }
 
 task sacrebleu : sacrebleu
-    < in=$out@decode_with_bundle
+    # < in=$out@decode_with_bundle
+    < in=$demasked_output
     < ref=$raw_data_test_trg
     > bleu
     > signature

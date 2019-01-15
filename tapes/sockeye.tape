@@ -132,6 +132,7 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   :: factors=(SourceFactors: no yes)
   :: casing=(Casing: actual true lower_source)
   :: tokenize=(DoTokenize: yes="yes" no="no")
+  :: mask=(DoMasking: no="no" yes="yes")
   :: subword_method=(SubwordMethod: sentencepiece bpe none)
   :: SRC=@
   :: TRG=@
@@ -156,6 +157,18 @@ task package_model : sockeye mosesdecoder sockeye_scripts
 
   pre_cmd="cat"
   post_cmd="cat"
+
+  if [[ $mask == "yes" ]]; then
+    mkdir masker
+    cp ${sockeye_scripts}/masking/mask_terms.py masker/
+    pre_cmd+=" | python \$rundir/masker/mask_terms.py --pattern_files $masking_pattern_files"
+
+    if [ ! -z "$masking_add_index" ] ; then
+      pre_cmd+=" --add-index"
+    fi
+    pre_cmd+=" | tee masked_src"
+  fi
+
   if [[ $tokenize == "yes" ]]; then
     mkdir tokenizer
     cp -a ${mosesdecoder}/scripts/tokenizer/* tokenizer/
@@ -192,6 +205,10 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   if [[ $tokenize == "yes" ]]; then
     cp ${mosesdecoder}/scripts/tokenizer/detokenizer.perl moses
     post_cmd+=" | \$rundir/tokenizer/detokenizer.perl -q -l \$lang"
+  fi
+
+  if [[ $mask == "yes" ]]; then
+    post_cmd+=""  # TODO
   fi
 
   echo $pre_cmd >> pre.sh
@@ -247,7 +264,7 @@ task decode_with_bundle : sockeye tools
 
 # the target input here is used to compute naïve acc and ppl,
 # that's why we need post-bpe target input
-task decode : sockeye
+task decode : sockeye tools
     < in=$prepared_data[DataSection:test,side:src]
     < model=$model@train
     < factor_files=(SourceFactors: no="/dev/null" yes=$factor_files@compute_source_factors[DataSection:test])
@@ -267,7 +284,6 @@ task decode : sockeye
   if [[ $use_cpu == "yes" ]]; then
     device_flag="--use-cpu"
   else
-    unset CUDA_VISIBLE_DEVICES
     device_flag="--device-ids -$num_devices"
   fi
 
@@ -278,7 +294,7 @@ task decode : sockeye
 
   export PYTHONPATH=${sockeye}
 
-  python3 -m sockeye.translate \
+  CUDA_VISIBLE_DEVICES=`free-gpu` python3 -m sockeye.translate \
     -m $model \
     $device_flag \
     --disable-device-locking \
@@ -290,6 +306,6 @@ task decode : sockeye
     --batch-size $test_batch_size \
     --max-input-len $test_max_sent_length \
 
-    cat out.all | unpaste $scores $out
+    cat out.all | $tools/bin/unpaste $scores $out
     mv out.all.log $log
 }
