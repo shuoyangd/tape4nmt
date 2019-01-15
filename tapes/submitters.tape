@@ -40,6 +40,7 @@ submitter sge :: action_flags
     echo "#$ $action_flags" >> $wrapper
     echo "#$ -j y" >> $wrapper
     echo "#$ -o localhost:$PWD/job.out" >> $wrapper
+    echo "#$ -e localhost:$PWD/job.err" >> $wrapper
     echo "#$ -N $CONFIGURATION-$TASK-$REALIZATION" >> $wrapper
     echo "" >> $wrapper
 
@@ -49,6 +50,10 @@ submitter sge :: action_flags
     echo "set -euo pipefail" >> $wrapper
     echo "" >> $wrapper
     echo "$TASK_VARIABLES" | perl -pe 's/=/="/; s/$/"/' >> $wrapper
+
+    # debug gpu stuff
+    nvidia-smi
+    echo "free gpu returns `free-gpu`"
 
     # Setup the virtual environment
     cat >> $wrapper <<EOF
@@ -81,8 +86,8 @@ EOF
     echo "env | grep CUDA" >> $wrapper
     echo "env | grep SGE" >> $wrapper
     echo "echo" >> $wrapper
-    echo "echo Setting CUDA_VISIBLE_DEVICES=\${SGE_HGR_gpu:-}" >> $wrapper
-    echo "export CUDA_VISIBLE_DEVICES=\$(echo \${SGE_HGR_gpu:-} | perl -pe 's/ /,/g')" >> $wrapper
+    # echo "echo Setting CUDA_VISIBLE_DEVICES=\${SGE_HGR_gpu:-}" >> $wrapper
+    # echo "export CUDA_VISIBLE_DEVICES=\$(echo \${SGE_HGR_gpu:-} | perl -pe 's/ /,/g')" >> $wrapper
     echo "env | grep CUDA" >> $wrapper
     echo >> $wrapper
 

@@ -49,7 +49,7 @@ task train : sockeye
     :: num_layers=@
     :: num_embed=@
     :: transformer_model_size=@
-    :: transformer_attention_heads=@    
+    :: transformer_attention_heads=@
     :: transformer_feed_forward_num_hidden=@
     :: source_factors=@
     :: source_factors_num_embed=@
@@ -68,17 +68,14 @@ task train : sockeye
 
   dev_factors_flag=""
   source_factors_flag=""
-  if [[ $use_source_factors ]]; then
+  if [[ $use_source_factors == "yes" ]]; then
     dev_factors_flag="--validation-source-factors $(cat $dev_factor_files)"
     source_factors_flag="--source-factors-num-embed $source_factors_num_embed --source-factors-combine $source_factors_combine"
   fi
 
   export PYTHONPATH=${sockeye}
 
-  source deactivate
-  conda activate sockeye
-
-  python3 -m sockeye.train \
+  CUDA_VISIBLE_DEVICES=`free-gpu` python3 -m sockeye.train \
     -o $model \
     $device \
     --disable-device-locking \
@@ -165,7 +162,7 @@ task package_model : sockeye mosesdecoder sockeye_scripts
     cp -a ${mosesdecoder}/scripts/share .
 
     if [[ $SRC == "zh" ]]; then
-      cp ${sockeye_scripts/zh/segment-chinese.pl tokenizer/
+      cp ${sockeye_scripts}/zh/segment-chinese.pl tokenizer/
       pre_cmd+=" | \$rundir/tokenizer/segment-chinese.pl"
     fi
 
@@ -213,12 +210,13 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   chmod 755 pre.sh post.sh translate.sh
 }
 
-task decode_with_bundle : sockeye
+task decode_with_bundle : sockeye tools
     < in=$raw_data_test_src
     < bundled_model=$bundle@package_model
     > out="out"
     > log="out.log"
     > scores="out.scores"
+    :: num_devices=@
     :: test_max_sent_length=@
     :: test_beam_size=@
     :: test_batch_size=@
@@ -231,7 +229,8 @@ task decode_with_bundle : sockeye
   if [[ $use_cpu == "yes" ]]; then
     device_flag="--use-cpu"
   else
-    device_flag="--device-ids -1"
+    unset CUDA_VISIBLE_DEVICES
+    device_flag="--device-ids -$num_devices"
   fi
 
   cat $in | ${bundled_model}/translate.sh \
@@ -243,7 +242,7 @@ task decode_with_bundle : sockeye
     --max-input-len $test_max_sent_length \
     > out.all 2> $log
 
-    cat out.all | unpaste $scores $out
+    cat out.all | $tools/bin/unpaste $scores $out
 }
 
 # the target input here is used to compute naïve acc and ppl,
@@ -255,6 +254,7 @@ task decode : sockeye
     > out="out"
     > log="out.log"
     > scores="out.scores"
+    :: num_devices=@
     :: test_max_sent_length=@
     :: test_beam_size=@
     :: test_batch_size=@
@@ -267,7 +267,8 @@ task decode : sockeye
   if [[ $use_cpu == "yes" ]]; then
     device_flag="--use-cpu"
   else
-    device_flag="--device-ids -1"
+    unset CUDA_VISIBLE_DEVICES
+    device_flag="--device-ids -$num_devices"
   fi
 
   factor_flag=""

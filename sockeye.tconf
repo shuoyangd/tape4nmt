@@ -7,6 +7,16 @@
 # import "confs/wmt18-en-ru.tconf"
 
 global {
+
+  SRC=(Direction: ruen="ru" enru="en")
+  TRG=(Direction: ruen="en" enru="ru")
+
+  train_prefix="/home/shuoyangd/projects/whale19_masking/mexps/data/train.100000"
+  dev_prefix="sacrebleu://wmt16 sacrebleu://wmt17"
+  test_prefix="sacrebleu://wmt18"
+}
+
+global {
   ##################################################################################################
   # General options you should set for your environment
   ##################################################################################################
@@ -53,20 +63,20 @@ global {
   ##################################################################################################
 
   # SGE: flags for notifying about job completion (put in your email address!)
-  action_flags="-m ae -M YOUR@EMAIL.HERE"
+  action_flags="-m ae -M dings@jhu.edu"
 
   # SGE: generic job flags
-  resource_flags="-l mem_free=2g,h_rt=12:00:00"
+  resource_flags="-l mem_free=2g"
 
   # SGE: larger job flags
-  resource_flags_16g="-l mem_free=16g,h_rt=12:00:00"
+  resource_flags_16g="-l hostname=c*,mem_free=16g"
 
   # SGE: flags for training a model
-  num_devices=2
-  resource_flags_train="-q gpu.q@@1080 -l gpu=2,mem_free=20g,h_rt=168:00:00"
+  num_devices=1
+  resource_flags_train="-q g.q -l hostname=c*,gpu=1,mem_free=20g"
 
   # SGE: flags for decoding
-  resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g,h_rt=4:00:00"
+  resource_flags_decode="-q g.q -l hostname=c*,gpu=1,mem_free=4g"
 
   # The default submitter: shell (run locally) or sge (run on a grid)
   submitter=(TestMode: no="sge" yes="shell")
@@ -75,7 +85,8 @@ global {
   # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
   # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
   # the path to the script that should be loaded.
-  pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+  # pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+  pyenv="/home/shuoyangd/pyenv/py3mx/bin/activate"
 
   ##################################################################################################
   # Preprocessing options
@@ -96,19 +107,16 @@ global {
 }
 
 plan test {
-  reach multi_bleu, sacrebleu via 
+  reach multi_bleu, sacrebleu via
     (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: *) * (SourceFactors: yes) *
     (TestMode: yes)
 
-  # reach sacrebleu via 
+  # reach sacrebleu via
   #   (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: actual) *
   #   (TestMode: yes)
 }
 
 plan transformer {
   reach sacrebleu via
-    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: actual) * (NumLayers: 6_6)
-
-  reach sacrebleu via
-    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: lower_source) * (SourceFactors: no yes) * (NumLayers: 6_6)
+    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: actual) * (NumLayers: 6_6) * (Direction: *)
 }
