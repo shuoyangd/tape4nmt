@@ -39,7 +39,7 @@ submitter sge :: action_flags
     echo "#$ $resource_flags" >> $wrapper
     echo "#$ $action_flags" >> $wrapper
     echo "#$ -j y" >> $wrapper
-    echo "#$ -o localhost:$PWD/job.out" >> $wrapper
+    echo "#$ -o $PWD/job.out" >> $wrapper
     echo "#$ -N $CONFIGURATION-$TASK-$REALIZATION" >> $wrapper
     echo "" >> $wrapper
 
