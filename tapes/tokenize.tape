@@ -1,7 +1,7 @@
 global {
   tokenized_data=(DoTokenize:
     yes=$out@tokenize
-    no=$out@download_or_link
+    no=$raw_data
    )
 }
 
@@ -26,7 +26,7 @@ func tokenize : mosesdecoder tools sockeye_scripts # stanford_seg
 }
 
 task tokenize calls tokenize : mosesdecoder tools # stanford_seg
-    < in=$masked_data
+    < in=$raw_data
     > out
     :: Lang=(side: src=$SRC trg=$TRG)
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags

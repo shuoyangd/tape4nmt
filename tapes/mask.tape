@@ -1,6 +1,6 @@
 global {
   masked_data=(DoMasking:
-    no=$raw_data
+    no=$tokenized_data
     yes=(side:
       src=$src_out@mask
       trg=$trg_out@mask
@@ -8,20 +8,13 @@ global {
   )
 }
 
-func dummy
-    < in
-    > out {
-    
-  ln -s $in $out
-} 
-
 task mask : sockeye_scripts tools
-  :: masking_add_index=@
-  :: masking_pattern_files=@
-  < src_in=$raw_data[side:src]
-  < trg_in=$raw_data[side:trg]
+  < src_in=$tokenized_data[side:src]
+  < trg_in=$tokenized_data[side:trg]
   > src_out
-  > trg_out {
+  > trg_out
+  :: masking_add_index=@
+  :: masking_pattern_files=@ {
 
     paste $src_in $trg_in > in
     cmd="cat in | python $sockeye_scripts/masking/mask_terms.py --pattern_files $masking_pattern_files"
@@ -36,7 +29,3 @@ task mask : sockeye_scripts tools
 
     $tools/bin/unpaste $src_out $trg_out < out
 }
-
-task dummy_aggregate_mask calls dummy
-    < in=$masked_data
-    > out
