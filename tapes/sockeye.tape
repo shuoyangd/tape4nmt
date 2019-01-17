@@ -75,7 +75,7 @@ task train : sockeye
 
   export PYTHONPATH=${sockeye}
 
-  CUDA_VISIBLE_DEVICES=`free-gpu` python3 -m sockeye.train \
+  python3 -m sockeye.train \
     -o $model \
     $device \
     --disable-device-locking \
@@ -175,8 +175,8 @@ task package_model : sockeye mosesdecoder sockeye_scripts
     cp -a ${mosesdecoder}/scripts/share .
 
     if [[ $SRC == "zh" ]]; then
-      cp ${sockeye_scripts}/zh/segment-chinese.pl tokenizer/
-      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.pl"
+      cp ${sockeye_scripts}/zh/segment-chinese.py tokenizer/
+      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.py"
     fi
 
     pre_cmd+=" | \$rundir/tokenizer/normalize-punctuation.perl -l \$lang | \$rundir/tokenizer/remove-non-printing-char.perl | \$rundir/tokenizer/tokenizer.perl -l \$lang -no-escape -protected \$rundir/tokenizer/basic-protected-patterns -q"
@@ -294,7 +294,7 @@ task decode : sockeye tools
 
   export PYTHONPATH=${sockeye}
 
-  CUDA_VISIBLE_DEVICES=`free-gpu` python3 -m sockeye.translate \
+  python3 -m sockeye.translate \
     -m $model \
     $device_flag \
     --disable-device-locking \
