@@ -49,7 +49,7 @@ task train : sockeye
     :: num_layers=@
     :: num_embed=@
     :: transformer_model_size=@
-    :: transformer_attention_heads=@    
+    :: transformer_attention_heads=@
     :: transformer_feed_forward_num_hidden=@
     :: source_factors=@
     :: source_factors_num_embed=@
@@ -132,6 +132,7 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   :: factors=(SourceFactors: no yes)
   :: casing=(Casing: actual true lower_source)
   :: tokenize=(DoTokenize: yes="yes" no="no")
+  :: mask=(DoMasking: no="no" yes="yes")
   :: subword_method=(SubwordMethod: sentencepiece bpe none)
   :: SRC=@
   :: TRG=@
@@ -156,14 +157,26 @@ task package_model : sockeye mosesdecoder sockeye_scripts
 
   pre_cmd="cat"
   post_cmd="cat"
+
+  if [[ $mask == "yes" ]]; then
+    mkdir masker
+    cp ${sockeye_scripts}/masking/mask_terms.py masker/
+    pre_cmd+=" | python \$rundir/masker/mask_terms.py --pattern_files $masking_pattern_files"
+
+    if [ ! -z "$masking_add_index" ] ; then
+      pre_cmd+=" --add-index"
+    fi
+    pre_cmd+=" | tee masked_src"
+  fi
+
   if [[ $tokenize == "yes" ]]; then
     mkdir tokenizer
     cp -a ${mosesdecoder}/scripts/tokenizer/* tokenizer/
     cp -a ${mosesdecoder}/scripts/share .
 
     if [[ $SRC == "zh" ]]; then
-      cp ${sockeye_scripts/zh/segment-chinese.pl tokenizer/
-      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.pl"
+      cp ${sockeye_scripts}/zh/segment-chinese.py tokenizer/
+      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.py"
     fi
 
     pre_cmd+=" | \$rundir/tokenizer/normalize-punctuation.perl -l \$lang | \$rundir/tokenizer/remove-non-printing-char.perl | \$rundir/tokenizer/tokenizer.perl -l \$lang -no-escape -protected \$rundir/tokenizer/basic-protected-patterns -q"
@@ -194,6 +207,10 @@ task package_model : sockeye mosesdecoder sockeye_scripts
     post_cmd+=" | \$rundir/tokenizer/detokenizer.perl -q -l \$lang"
   fi
 
+  if [[ $mask == "yes" ]]; then
+    post_cmd+=""  # TODO
+  fi
+
   echo $pre_cmd >> pre.sh
   echo $post_cmd >> post.sh
 
@@ -210,12 +227,13 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   chmod 755 pre.sh post.sh translate.sh
 }
 
-task decode_with_bundle : sockeye
+task decode_with_bundle : sockeye tools
     < in=$raw_data_test_src
     < bundled_model=$bundle@package_model
     > out="out"
     > log="out.log"
     > scores="out.scores"
+    :: num_devices=@
     :: test_max_sent_length=@
     :: test_beam_size=@
     :: test_batch_size=@
@@ -228,7 +246,8 @@ task decode_with_bundle : sockeye
   if [[ $use_cpu == "yes" ]]; then
     device_flag="--use-cpu"
   else
-    device_flag="--device-ids -1"
+    unset CUDA_VISIBLE_DEVICES
+    device_flag="--device-ids -$num_devices"
   fi
 
   cat $in | ${bundled_model}/translate.sh \
@@ -240,18 +259,19 @@ task decode_with_bundle : sockeye
     --max-input-len $test_max_sent_length \
     > out.all 2> $log
 
-    cat out.all | unpaste $scores $out
+    cat out.all | $tools/bin/unpaste $scores $out
 }
 
 # the target input here is used to compute naïve acc and ppl,
 # that's why we need post-bpe target input
-task decode : sockeye
+task decode : sockeye tools
     < in=$prepared_data[DataSection:test,side:src]
     < model=$model@train
     < factor_files=(SourceFactors: no="/dev/null" yes=$factor_files@compute_source_factors[DataSection:test])
     > out="out"
     > log="out.log"
     > scores="out.scores"
+    :: num_devices=@
     :: test_max_sent_length=@
     :: test_beam_size=@
     :: test_batch_size=@
@@ -264,7 +284,7 @@ task decode : sockeye
   if [[ $use_cpu == "yes" ]]; then
     device_flag="--use-cpu"
   else
-    device_flag="--device-ids -1"
+    device_flag="--device-ids -$num_devices"
   fi
 
   factor_flag=""
@@ -286,6 +306,6 @@ task decode : sockeye
     --batch-size $test_batch_size \
     --max-input-len $test_max_sent_length \
 
-    cat out.all | unpaste $scores $out
+    cat out.all | $tools/bin/unpaste $scores $out
     mv out.all.log $log
 }

@@ -1,6 +1,7 @@
 import "tapes/packages.tape"
 import "tapes/submitters.tape"
 import "tapes/versioners.tape"
+import "tapes/dummy.tape"
 
 # ==== pipeline starts here ====
 
@@ -15,6 +16,9 @@ import "tapes/prepare_train.tape"
 # prepare dev/test data, e.g. extract text from sgm:
 # - extract dev/test from sgm format, if the wrapping exists
 import "tapes/prepare_devtest.tape"
+
+# perform masking on reserved symbols to improve consistency 
+import "tapes/mask.tape"
 
 # tasks related to tokenize
 import "tapes/tokenize.tape"

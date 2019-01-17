@@ -13,6 +13,7 @@ package sentencepiece :: .versioner=git .repo="https://github.com/google/sentenc
 }
 
 package tools :: .versioner=git .repo="https://github.com/shuoyangd/tape4nmt-tools" .ref=HEAD {
+  git submodule update --init --recursive
   pip install -r requirements.txt
 }
 

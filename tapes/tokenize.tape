@@ -1,7 +1,7 @@
 global {
   tokenized_data=(DoTokenize:
     yes=$out@tokenize
-    no=$out@download_or_link
+    no=$raw_data
    )
 }
 

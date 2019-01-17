@@ -9,19 +9,19 @@ global {
   )
 
   # This has to be separated out from the recased_data definition, don't know why.
-  maybe_lowered=(side: src=$out@lowercase trg=$tokenized_data)
+  maybe_lowered=(side: src=$out@lowercase trg=$out@dummy_aggregate_mask)
 
   # don't do truecase when doing characterize
   # truecase will mess up the word boundary annotation
   recased_data=(Casing:
-    actual=$tokenized_data
+    actual=$out@dummy_aggregate_mask
     true=$out@truecase
     lower_source=$maybe_lowered)
 }
 
 task train_truecaser : mosesdecoder
-    < src_in=$prepared_data[DataSection:train,side:src]
-    < trg_in=$prepared_data[DataSection:train,side:trg]
+    < src_in=$out@dummy_aggregate_mask[DataSection:train,side:src]
+    < trg_in=$out@dummy_aggregate_mask[DataSection:train,side:trg]
     > out
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
@@ -37,7 +37,7 @@ task train_truecaser : mosesdecoder
 }
 
 task truecase : mosesdecoder
-    < in=$tokenized_data
+    < in=$out@dummy_aggregate_mask
     < model=(side: src=$src_truecaser trg=$trg_truecaser)
     > out
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
@@ -46,7 +46,7 @@ task truecase : mosesdecoder
 }
 
 task lowercase : mosesdecoder
-  < in=$tokenized_data
+  < in=$out@dummy_aggregate_mask
   > out
   :: .submitter=shell {
 

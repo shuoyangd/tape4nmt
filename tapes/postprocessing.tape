@@ -18,6 +18,11 @@ global {
     yes=$out@detokenize
     no=$detruecased_output
   )
+
+  demasked_output=(DoMasking:
+    no=$out@detokenize
+    yes=$out@demask
+  )
 }
 
 task debpe
@@ -66,6 +71,16 @@ task decharacterize : tools
   fi
 
   python $tools/decharacterize.py < $in > $out
+}
+
+task demask : sockeye_scripts tools
+    < sys_in=$detokenized_output
+    < orig_src=$raw_data[DataSection:test,side:src]
+    < mask_src=$out@dummy_aggregate_mask[DataSection:test,side:src]
+    > out {
+
+    paste $sys_in $orig_src $mask_src > in
+    python $sockeye_scripts/masking/mask_terms.py -u < in > $out
 }
 
 # do not support merge for the moment
