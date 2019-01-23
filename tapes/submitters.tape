@@ -81,9 +81,10 @@ EOF
     echo "env | grep CUDA" >> $wrapper
     echo "env | grep SGE" >> $wrapper
     echo "echo" >> $wrapper
-    # echo "echo Setting CUDA_VISIBLE_DEVICES=\${SGE_HGR_gpu:-}" >> $wrapper
-    # echo "export CUDA_VISIBLE_DEVICES=\$(echo \${SGE_HGR_gpu:-} | perl -pe 's/ /,/g')" >> $wrapper
-    echo "env | grep CUDA" >> $wrapper
+    echo "if [[ ! -z \${SGE_HGR_GPU:-} ]]; then" >> $wrapper
+    echo "  export CUDA_VISIBLE_DEVICES=\$(echo \${SGE_HGR_gpu:-} | perl -pe 's/ /,/g')" >> $wrapper
+    echo "  echo \"Setting CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES}\"" >> $wrapper
+    echo "fi" >> $wrapper
     echo >> $wrapper
 
     echo "$COMMANDS" >> $wrapper
