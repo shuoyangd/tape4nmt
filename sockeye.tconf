@@ -48,6 +48,10 @@ global {
   # set to same as num_embed if using combine method "sum"
   source_factors_num_embed="512 512"
 
+  # MASKING
+  masking_add_index=no
+  masking_pattern_files=""
+
   ##################################################################################################
   # Job submission parameters
   ##################################################################################################

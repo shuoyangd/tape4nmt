@@ -19,13 +19,10 @@ task mask : sockeye_scripts tools
     paste $src_in $trg_in > in
     cmd="cat in | python $sockeye_scripts/masking/mask_terms.py --pattern_files $masking_pattern_files"
 
-    if [ ! -z "$masking_add_index" ] ; then
-      cmd=$cmd" --add-index"
+    if [[ $masking_add_index -eq "yes" ]]; then
+      cmd+=" --add-index"
     fi
 
-    cmd=$cmd" > out"
     echo $cmd
-    eval $cmd
-
-    $tools/bin/unpaste $src_out $trg_out < out
+    $cmd | $tools/bin/unpaste $src_out $trg_out
 }
