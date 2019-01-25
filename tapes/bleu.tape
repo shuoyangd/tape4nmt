@@ -38,7 +38,6 @@ task sacrebleu : sacrebleu
     < ref=$raw_data_test_trg
     > bleu
     > signature
-    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags
     :: pyenv=@ {
 
   cat $in | sacrebleu $ref | cut -d' ' -f1 > $signature
