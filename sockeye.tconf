@@ -42,7 +42,7 @@ global {
 
   # SOURCE FACTORS
   # the factors to compute
-  source_factors="bpe case"
+  source_factors="subword case"
   # how to combine factors: "concat" or "sum"
   source_factors_combine="sum"
   # set to same as num_embed if using combine method "sum"

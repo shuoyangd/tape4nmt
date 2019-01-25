@@ -124,16 +124,16 @@ task train : sockeye
 # Takes all the data and builds a packaged model directory.
 # Ideally this should be used for evaluation.
 task package_model : sockeye mosesdecoder sockeye_scripts
-  < in=$raw_data[DataSection:test,side:src]
   < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
   < casing_model=(Casing: actual="/dev/null" true=$out@train_truecaser lower_source="/dev/null")
   < model=$model@train
   > bundle="bundle"
-  :: factors=(SourceFactors: no yes)
   :: casing=(Casing: actual true lower_source)
   :: tokenize=(DoTokenize: yes="yes" no="no")
   :: mask=(DoMasking: no="no" yes="yes")
   :: subword_method=(SubwordMethod: sentencepiece bpe none)
+  :: use_factors=(SourceFactors: no yes)
+  :: source_factors=@
   :: SRC=@
   :: TRG=@
   :: .submitter=shell {
@@ -141,6 +141,7 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   mkdir bundle
   cd bundle
   cp -a ${sockeye} sockeye
+  cp -a ${sockeye_scripts} sockeye_scripts
 
   ## Pre-processing and post-processing
   rm -f pre.sh
@@ -155,73 +156,89 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   echo "lang=\${1:-$TRG}" >> post.sh
   echo "rundir=\$(dirname \$0)" >> post.sh
 
-  pre_cmd="cat"
+  # Creates a JSON object from the plain input
+  pre_cmd="\$rundir/sockeye_scripts/preparation/wrap_in_json -r raw_text"
   post_cmd="cat"
 
   if [[ $mask == "yes" ]]; then
     mkdir masker
-    cp ${sockeye_scripts}/masking/mask_terms.py masker/
-    pre_cmd+=" | python \$rundir/masker/mask_terms.py --pattern_files $masking_pattern_files"
+    pre_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json --pattern_files $masking_pattern_files"
 
     if [ ! -z "$masking_add_index" ] ; then
       pre_cmd+=" --add-index"
     fi
-    pre_cmd+=" | tee masked_src"
   fi
 
   if [[ $tokenize == "yes" ]]; then
     mkdir tokenizer
     cp -a ${mosesdecoder}/scripts/tokenizer/* tokenizer/
     cp -a ${mosesdecoder}/scripts/share .
+    cat > tokenizer/moses_tokenizer <<EOF
+#!/bin/bash
 
+rundir=\$(dirname \$0)
+\$rundir/normalize-punctuation.perl -b -l $SRC \\
+  | \$rundir/remove-non-printing-char.perl -b \\
+  | \$rundir/tokenizer.perl -b -l $SRC -no-escape -protected \$rundir/basic-protected-patterns -q
+EOF
+    chmod 755 tokenizer/moses_tokenizer
     if [[ $SRC == "zh" ]]; then
       cp ${sockeye_scripts}/zh/segment-chinese.py tokenizer/
-      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.py"
+      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.py --json"
     fi
 
-    pre_cmd+=" | \$rundir/tokenizer/normalize-punctuation.perl -l \$lang | \$rundir/tokenizer/remove-non-printing-char.perl | \$rundir/tokenizer/tokenizer.perl -l \$lang -no-escape -protected \$rundir/tokenizer/basic-protected-patterns -q"
+    pre_cmd+=" | \$rundir/sockeye_scripts/preparation/wrap_in_json text tok_text \$rundir/tokenizer/moses_tokenizer"
   fi
 
+  prepare_casing_arg=""
   if [[ $casing == "lower_source" ]]; then
-    pre_cmd+=" | \$rundir/tokenizer/lowercase.perl"
+    prepare_casing_arg="--casing lower"
   elif [[ $casing == "true" ]]; then
-    cp -a ${mosesdecoder}/scripts/recaser .
-    cp ${casing_model} truecase.model
-    pre_cmd+=" | \$rundir/recaser/truecase.perl -model \$rundir/truecase.model"
+    # cp -a ${mosesdecoder}/scripts/recaser .
+    # cp ${casing_model} truecase.model
+    # pre_cmd+=" | \$rundir/sockeye_scripts/preparation/wrap_in_json text recased_text \"\$rundir/recaser/truecase.perl -b -model \$rundir/truecase.model\""
+    prepare_casing_arg="--casing true"
   fi
 
-  if [[ $subword_method == "sentencepiece" ]]; then
-    mkdir bin
-    cp ${sentencepiece}/build/src/spm_{encode,decode} bin
-    cp $subword_model .
-    pre_cmd+=" | \$rundir/bin/spm_encode --model \$rundir/$subword_model"
-    post_cmd+=" | \$rundir/bin/spm_decode --model \$rundir/$subword_model"
-  elif [[ $subword_method == "bpe" ]]; then
-    cp $subword_model bpe.model
-    pre_cmd+=" | subword-nmt apply-bpe -c \$rundir/bpe.model"
-    post_cmd+=" | perl -pe 's/@@( |\$)//g'"
+  prepare_subword_arg=""
+  if [[ $subword_model != "/dev/null" ]]; then
+    cp $subword_model subword.model
+    prepare_subword_arg="--subword-type $subword_method --subword-model \$rundir/subword.model"
   fi
+
+  pre_cmd+=" | \$rundir/sockeye_scripts/preparation/prepare.py $prepare_casing_arg $prepare_subword_arg"
+
+  if [[ $use_factors == "yes" ]]; then
+    pre_cmd+="| \$rundir/sockeye_scripts/source_factors/compute.py --json $source_factors"
+  fi  
+
+  if [[ $subword_method != "none" ]]; then
+      post_cmd+=" | \$rundir/sockeye_scripts/preparation/prepare.py --input-field translation --undo --subword-type $subword_method"
+  fi
+
+  # Extract translation
+  post_cmd+=" | \$rundir/sockeye_scripts/preparation/extract_json.py -f text"
 
   if [[ $tokenize == "yes" ]]; then
-    cp ${mosesdecoder}/scripts/tokenizer/detokenizer.perl moses
-    post_cmd+=" | \$rundir/tokenizer/detokenizer.perl -q -l \$lang"
+      post_cmd+=" | \$rundir/tokenizer/detokenizer.perl -q -l $TRG 2>/dev/null"
   fi
 
-  if [[ $mask == "yes" ]]; then
-    post_cmd+=""  # TODO
-  fi
+  # TODO: masking
 
   echo $pre_cmd >> pre.sh
   echo $post_cmd >> post.sh
 
   ## Translate
   cp -a ${model} sockeye_model
-  echo "#!/usr/bin/env bash" >> translate.sh
-  echo "" >> translate.sh
-  echo "bundledir=\$(dirname \$0)" >> translate.sh
-  echo "" >> translate.sh
-  echo "export PYTHONPATH=\$bundledir/sockeye" >> translate.sh
-  echo "\$bundledir/pre.sh ${SRC} | python3 -m sockeye.translate -m \$bundledir/sockeye_model \"\$@\" | \$bundledir/post.sh" >> translate.sh
+  cat > translate.sh <<EOF
+#!/usr/bin/env bash
+
+bundledir=\$(dirname \$0)
+
+\$bundledir/pre.sh ${SRC} \\
+  | PYTHONPATH=\$bundledir/sockeye python3 -m sockeye.translate -q -m \$bundledir/sockeye_model --json-input --output-type json "\$@" \\
+  | \$bundledir/post.sh
+EOF
 
   # permissions
   chmod 755 pre.sh post.sh translate.sh
@@ -232,7 +249,6 @@ task decode_with_bundle : sockeye tools
     < bundled_model=$bundle@package_model
     > out="out"
     > log="out.log"
-    > scores="out.scores"
     :: num_devices=@
     :: test_max_sent_length=@
     :: test_beam_size=@
@@ -246,23 +262,19 @@ task decode_with_bundle : sockeye tools
   if [[ $use_cpu == "yes" ]]; then
     device_flag="--use-cpu"
   else
-    unset CUDA_VISIBLE_DEVICES
-    device_flag="--device-ids -$num_devices"
+    device_flag="--device-ids -1"
   fi
 
   cat $in | ${bundled_model}/translate.sh \
     $device_flag \
     --disable-device-locking \
-    --output-type translation_with_score \
     --beam-size $test_beam_size \
     --batch-size $test_batch_size \
     --max-input-len $test_max_sent_length \
-    > out.all 2> $log
-
-    cat out.all | $tools/bin/unpaste $scores $out
+    > $out 2> $log
 }
 
-# the target input here is used to compute naïve acc and ppl,
+# the target input here is used to compute naïve and ppl,
 # that's why we need post-bpe target input
 task decode : sockeye tools
     < in=$prepared_data[DataSection:test,side:src]
