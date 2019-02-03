@@ -1,0 +1,47 @@
+steps:
+- id: maybe-cache-image
+  name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/tape4nmt-builder:latest || exit 0
+
+- id: build-builder
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '-t', 'gcr.io/$PROJECT_ID/tape4nmt-builder:latest',
+         '-f', 'Dockerfile',
+         '--cache-from', 'gcr.io/$PROJECT_ID/tape4nmt-builder:latest',
+         '.']
+
+- id: test-dryrun-fairseq
+  name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+  args: ['ducttape', 'fairseq.tape', '-C', 'fairseq.tconf', 'list']
+
+- id: test-dryrun-sockeye
+  name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+  args: ['ducttape', 'sockeye.tape', '-C', 'sockeye.tconf', 'list']
+
+# - id: test-venv
+#   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+#   args: ['test/test_venv.sh']
+
+# - id: test-conda
+#   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+#   args: ['test/test_conda.sh']
+
+# - id: test-preproc
+#   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+#   args: ['ducttape', 'test/test.tape', '-C', 'preproc.tconf', '-y']
+#
+# - id: test-fairseq
+#   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+#   args: ['ducttape', 'test/test.tape', '-C', 'fairseq.tconf', '-y']
+#
+# - id: test-sockeye
+#   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+#   args: ['ducttape', 'test/test.tape', '-C', 'conda.tconf', '-y']
+
+timeout: 1800s
+images: ['gcr.io/$PROJECT_ID/tape4nmt-builder:latest']
