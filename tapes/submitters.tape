@@ -8,7 +8,7 @@ submitter shell :: COMMANDS TASK_VARIABLES {
 
       # Load the environment
       if [[ $virtualenv == conda:* ]]; then
-        . /opt/anaconda3/etc/profile.d/conda.sh
+        . /etc/profile.d/conda.sh
         target=$(echo $virtualenv | cut -d: -f2-)
         source deactivate
         conda activate $target
@@ -59,7 +59,7 @@ if [[ ! -z \${pyenv:-} ]]; then
 
   # Load the environment
   if [[ \$virtualenv == conda:* ]]; then
-    . /opt/anaconda3/etc/profile.d/conda.sh
+    . /etc/profile.d/conda.sh
     target=\$(echo \$virtualenv | cut -d: -f2-)
     source deactivate
     conda activate \$target

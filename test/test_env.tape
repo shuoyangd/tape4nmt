@@ -10,7 +10,8 @@ global {
     subword_nmt="subword-nmt"
   )
 
-  pyenv=(PyEnv: venv="pytorch" conda="conda:pytorch")
+  pyenv=(PyEnv: venv="/root/pytorch/bin/activate" conda="conda:pytorch")
+  ducttape_output="out"
 }
 
 task check_python_package : sockeye sacrebleu subword_nmt mosesdecoder sentencepiece tools fairseq
@@ -20,6 +21,8 @@ task check_python_package : sockeye sacrebleu subword_nmt mosesdecoder sentencep
 
   if [ ! -z "`pip list | grep $pypackage`" ] ; then
     touch $out
+  else
+    echo "python package $pypackage does not exist!"
   fi
 }
 
@@ -29,6 +32,8 @@ task check_command : sockeye sacrebleu subword_nmt mosesdecoder sentencepiece to
 
   if [ ! -z "`command -v $command`" ] ; then
     touch $out
+  else
+    echo "command $command does not exist!"
   fi
 }
 

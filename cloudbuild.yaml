@@ -23,13 +23,13 @@ steps:
   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
   args: ['ducttape', 'sockeye.tape', '-C', 'sockeye.tconf', 'list']
 
-# - id: test-venv
-#   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
-#   args: ['test/test_venv.sh']
+- id: test-conda
+  name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+  args: ['test/test_conda.sh']
 
-# - id: test-conda
-#   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
-#   args: ['test/test_conda.sh']
+- id: test-venv
+  name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+  args: ['test/test_venv.sh']
 
 # - id: test-preproc
 #   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
@@ -43,5 +43,5 @@ steps:
 #   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
 #   args: ['ducttape', 'test/test.tape', '-C', 'conda.tconf', '-y']
 
-timeout: 1800s
+timeout: 7200s
 images: ['gcr.io/$PROJECT_ID/tape4nmt-builder:latest']
