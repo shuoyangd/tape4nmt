@@ -10,7 +10,7 @@ task binarize_data : onmt
   if [ ! -z $pyenv ] ; then
     source ${pyenv}/bin/activate
   fi
-  python $onmt/preprocess.py -train_src $train_src_in -train_tgt $train_trg_in -valid_src $dev_src_in -valid_tgt $dev_trg_in -save_data $out 
+  python $onmt/preprocess.py -train_src $train_src_in -train_tgt $train_trg_in -valid_src $dev_src_in -valid_tgt $dev_trg_in -save_data $out
 
   if [ -f ${out}.train.1.pt ] ; then
     touch $out

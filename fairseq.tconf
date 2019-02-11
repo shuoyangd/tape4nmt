@@ -1,7 +1,78 @@
-import "confs/data.tconf"
-import "confs/pipeline.tconf"
+##################################################################################################
+# Packages used 
+################################################################################################## 
+
+package sockeye :: .versioner=git .repo="https://github.com/mjpost/sockeye" .ref=HEAD { }
+package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.2.12" { }
+package subword_nmt :: .versioner=pip .package="subword-nmt" .tag="0.3.5" { }
+package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD { }
+
+package sentencepiece :: .versioner=git .repo="https://github.com/google/sentencepiece" .ref="tags/v0.1.5" {  # v0.1.6 throws segfault
+  mkdir build
+  cd build
+  cmake ..
+  make -j $(nproc)
+}
+
+package tools
+    :: .versioner=git .repo="https://github.com/shuoyangd/tape4nmt-tools" .ref=HEAD {
+  pip install -r requirements.txt
+}
+
+# using my fork for now, as fairseq evolves pretty fast
+package fairseq
+    :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=HEAD {
+
+  python setup.py build develop
+}
 
 global {
+
+  ##################################################################################################
+  # Data-related stuff
+  ################################################################################################## 
+
+  SRC=(TrainDataSource:
+    iwslt_deen_2014="de"
+  )
+  TRG=(TrainDataSource:
+    iwslt_deen_2014="en"
+  )
+  trg_lang=en  # FIXME (only used by wrap_xml, under some rare cases)
+
+  train_data=(TrainDataSource:
+    iwslt_deen_2014=(side:
+      src="/path/to/iwslt/train.tags.nourl.de-en.de"
+      trg="/path/to/iwslt/train.tags.nourl.de-en.en"
+    )
+  )
+
+  dev_data=(DevDataSource:
+    iwslt_deen_dev2010=(side:
+      src="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.dev2010.de-en.en.xml"
+    )
+    iwslt_deen_dev2012=(side:
+      src="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TEDX.dev2012.de-en.en.xml"
+    )
+  )
+
+  test_data=(TestDataSource:
+    iwslt_deen_test2010=(side:
+      src="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.tst2010.de-en.en.xml"
+    )
+    iwslt_deen_test2011=(side:
+      src="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.tst2011.de-en.en.xml"
+    )
+    iwslt_deen_test2012=(side:
+      src="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.de.xml"
+      trg="/path/to/iwslt/IWSLT14.TED.tst2012.de-en.en.xml"
+    )
+  )
+
   ##################################################################################################
   # General options you should set for your environment
   ##################################################################################################

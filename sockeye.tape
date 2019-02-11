@@ -1,7 +1,7 @@
-import "tapes/packages.tape"
 import "tapes/submitters.tape"
 import "tapes/versioners.tape"
 import "tapes/dummy.tape"
+import "tapes/pipeline.tape"
 
 # ==== pipeline starts here ====
 
@@ -47,7 +47,7 @@ import "tapes/bleu.tape"
 # ==== pipeline ends here ====
 
 plan test {
-#   reach sacrebleu via 
+#   reach sacrebleu via
 #     (SubwordMethod: sentencepiece) * (DoTokenize: no) * (DoTruecase: no) * 
 #     (TrainDataSource: iwslt_deen_2014) * 
 #     (SgmDev: yes) * (DevDataSource: iwslt_deen_dev2012) * 
