@@ -1,5 +1,6 @@
 #! /bin/bash
 
 source /root/pytorch/bin/activate
-ducttape test/test_env.tape -C fairseq.tconf -p test_venv -y
-rm -r out
+grep -Ev "^\s+pyenv" fairseq.tconf > tmp.tconf
+ducttape test/test_env.tape -C tmp.tconf -p test_venv -y
+rm -r out tmp.tconf

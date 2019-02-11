@@ -1,5 +1,6 @@
 #! /bin/bash
 
 source activate pytorch
-ducttape test/test_env.tape -C sockeye.tconf -p test_conda -y
-rm -r out
+grep -Ev "^\s+pyenv" sockeye.tconf > tmp.tconf
+ducttape test/test_env.tape -C tmp.tconf -p test_venv -y
+rm -r out tmp.tconf

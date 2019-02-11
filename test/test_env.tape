@@ -10,7 +10,6 @@ global {
   )
 
   pyenv=(PyEnv: venv="/root/pytorch/bin/activate" conda="conda:pytorch")
-  ducttape_output="out"
 }
 
 task check_python_package : sockeye sacrebleu subword_nmt mosesdecoder sentencepiece tools fairseq
