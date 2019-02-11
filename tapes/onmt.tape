@@ -1,15 +1,11 @@
 task binarize_data : onmt
-    < train_src_in=$out@apply_bpe[DataSection:train,side:src]
-    < train_trg_in=$out@apply_bpe[DataSection:train,side:trg]
-    < dev_src_in=$out@apply_bpe[DataSection:dev]
-    < dev_trg_in=$out@apply_bpe[DataSection:dev,side:trg]
+    < train_src_in=$out@dummy_aggregate_subword[DataSection:train,side:src]  # FIXME
+    < train_trg_in=$out@dummy_aggregate_subword[DataSection:train,side:trg]  # FIXME
+    < dev_src_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:src]  # FIXME
+    < dev_trg_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:trg]  # FIXME
     > out
-    :: .submitter="sge" .action_flags=$action_flags .resource_flags=$bigmem_resource_flags
-    :: pyenv=@ {
+    :: .submitter="sge" .action_flags=$action_flags .resource_flags=$resource_flags_16g {
 
-  if [ ! -z $pyenv ] ; then
-    source ${pyenv}/bin/activate
-  fi
   python $onmt/preprocess.py -train_src $train_src_in -train_tgt $train_trg_in -valid_src $dev_src_in -valid_tgt $dev_trg_in -save_data $out
 
   if [ -f ${out}.train.1.pt ] ; then
@@ -20,9 +16,9 @@ task binarize_data : onmt
 task train : onmt
     < in=$out@binarize_data
     > out
-    :: .submitter="sge" 
-    :: .action_flags=$gpu_action_flags
-    :: .resource_flags=$bigmem_gpu_resource_flags
+    :: .submitter="sge"
+    :: .action_flags="-m bae -M dings@jhu.edu -q g.q"
+    :: .resource_flags="-l 'hostname=c*,gpu=1,mem_free=4g,ram_free=4g'"
     :: pyenv=@
     :: train_train_from=@
     :: train_train_from_state_dict=@
@@ -37,39 +33,31 @@ task train : onmt
     :: train_learning_rate=@
     :: train_encoder_type=@ {
 
-  if [ ! -z $pyenv ] ; then
-    source ${pyenv}/bin/activate
-  fi
-  export n_gpus=`lspci | grep -i "nvidia" | wc -l`
-  export device=`nvidia-smi | sed -e '1,/Processes/d' | tail -n+3 | head -n-1 | perl -ne 'next unless /^\|\s+(\d)\s+\d+/; $a{$1}++; for(my $i=0;$i<$ENV{"n_gpus"};$i++) { if (!defined($a{$i})) { print $i."\n"; last; }}' | tail -n 1`
-  echo "gpu$device at "`hostname`
-  if [ -z $device ] ; then
-    echo "no device! grid cheaaaaaaaaaatin!"
-    exit;
-  fi
-  
+  export device=`free-gpu`
+  echo $device
+
   cmd="python $onmt/train.py -data $in -save_model $out -gpuid $device"
-  
+
   if [ ! -z $train_train_from ] ; then
     cmd=$cmd" -train_from $train_from"
   fi
-  
+
   if [ ! -z $train_train_from_state_dict ] ; then
     cmd=$cmd" -train_from $train_from_state_dict"
   fi
-  
+
   if [ ! -z $train_start_epoch ] ; then
     cmd=$cmd" -start_epoch $start_epoch"
   fi
-  
+
   if [ ! -z $train_brnn ] ; then
-    cmd=$cmd" -brnn" 
+    cmd=$cmd" -brnn"
   fi
-  
+
   if [ ! -z $train_encoder_type ] ; then
     cmd=$cmd" -encoder_type $train_encoder_type"
   fi
-  
+
   cmd=$cmd" -layers $train_layers -rnn_size $train_rnn_size -word_vec_size $train_word_vec_size -batch_size $train_batch_size -epochs $train_epochs -optim $train_optim -dropout $train_dropout -learning_rate $train_learning_rate"
   echo $cmd
   $cmd
@@ -124,25 +112,20 @@ task model_selection
 # the target input here is used to compute naïve acc and ppl,
 # that's why we need post-bpe target input
 task decode : onmt
-    < src_in=$out@apply_bpe[DataSection:devtest,side:src]
-    < trg_in=$out@apply_bpe[DataSection:devtest,side:trg]
+    < src_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:test,side:src]
+    < trg_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:test,side:trg]
     < model=$out@model_selection
     > out
     :: test_max_sent_length=@
     :: test_beam_size=@
     :: test_batch_size=@
     :: test_replace_unk=@
-    :: .submitter="sge" 
+    :: .submitter="sge"
     :: .action_flags="-m ae -M dings@jhu.edu -q g.q"
-    :: .resource_flags="-l 'hostname=c*,gpu=1'"
+    :: .resource_flags="-l 'hostname=c*,gpu=1,mem_free=4g,ram_free=4g'"
     :: pyenv=@ {
 
-  if [ ! -z $pyenv ] ; then
-    source ${pyenv}/bin/activate
-  fi
-
-  export n_gpus=`lspci | grep -i "nvidia" | wc -l`
-  export device=`nvidia-smi | sed -e '1,/Processes/d' | tail -n+3 | head -n-1 | perl -ne 'next unless /^\|\s+(\d)\s+\d+/; $a{$1}++; for(my $i=0;$i<$ENV{"n_gpus"};$i++) { if (!defined($a{$i})) { print $i."\n"; last; }}' | tail -n 1`
+  export device=`free-gpu`
   echo $device
   refn=`ls $trg_in* | wc -l`
 
