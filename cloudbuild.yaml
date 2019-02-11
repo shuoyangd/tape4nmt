@@ -23,6 +23,10 @@ steps:
   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
   args: ['ducttape', 'sockeye.tape', '-C', 'sockeye.tconf', 'list']
 
+- id: test-dryrun-onmt
+  name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
+  args: ['ducttape', 'onmt.tape', '-C', 'onmt.tconf', 'list']
+
 - id: test-conda
   name: 'gcr.io/$PROJECT_ID/tape4nmt-builder'
   args: ['test/test_conda.sh']
