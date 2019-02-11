@@ -30,16 +30,6 @@ RUN python -m venv pytorch \
     && source pytorch/bin/activate \
     && pip install https://download.pytorch.org/whl/cpu/torch-1.0.0-cp36-cp36m-linux_x86_64.whl \
     && deactivate
-# configure mxnet venv
-RUN python -m venv mxnet \
-    && source mxnet/bin/activate \
-    && pip install mxnet \
-    && deactivate
-# configure pytorch conda
-RUN conda create --name pytorch -y \
-    && source activate pytorch \
-    && conda install pytorch-cpu -c pytorch \
-    && source deactivate
 # configure mxnet conda
 RUN conda create --name mxnet -y \
     && source activate mxnet \
