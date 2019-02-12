@@ -46,5 +46,5 @@ task apply_sentencepiece : sentencepiece
   > out 
   :: pyenv=@ {
 
-  cat $in | ${sentencepiece}/build/src/spm_encode --model $model > $out
+  cat $in | ${sentencepiece}/build/src/spm_encode --model $model --output_format sample_piece > $out
 }
