@@ -30,14 +30,14 @@ global {
 
   # Sockeye
   train_checkpoint_freq=(TestMode: no=5000 yes=100)
-  train_max_checkpoints_not_improved=(TestMode: no=5 yes=0)
+  train_max_checkpoints_not_improved=(TestMode: no=10 yes=0)
 
   # the number of sentences to use from the dev set
   train_num_decode_and_eval=(TestMode: no=500 yes=10)
 
   # TEST CONFIGURATIONS
   test_beam_size=(TestMode: no="12" yes="1")
-  test_batch_size=5
+  test_batch_size=32
   test_max_sent_length=100
 
   # SOURCE FACTORS
@@ -67,7 +67,7 @@ global {
 
   # SGE: flags for training a model
   num_devices=2
-  resource_flags_train="-q gpu.q@@1080 -l gpu=2,mem_free=20g,h_rt=168:00:00"
+  resource_flags_train="-q gpu.q@@1080 -l gpu=2,mem_free=20g,h_rt=504:00:00"
 
   # SGE: flags for decoding
   resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g,h_rt=4:00:00"
