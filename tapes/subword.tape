@@ -35,7 +35,10 @@ task train_sentencepiece : sentencepiece
   > vocab="sp.vocab"
   :: sentencepiece_vocab_size=@
   :: sentencepiece_model_type=@
-  :: pyenv=@ {
+  :: pyenv=@
+  :: .submitter=$submitter
+  :: .resource_flags=$resource_flags_16cpu
+  :: .action_flags=@ {
 
   ${sentencepiece}/build/src/spm_train --input $src_in,$trg_in --model_prefix sp --vocab_size $sentencepiece_vocab_size --character_coverage 1.0 --model_type $sentencepiece_model_type
 }

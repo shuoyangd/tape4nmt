@@ -65,6 +65,9 @@ global {
   # SGE: larger job flags
   resource_flags_16g="-l mem_free=16g,h_rt=12:00:00"
 
+  # SGE: larger job flags
+  resource_flags_16cpu="-l mem_free=16g,num_proc=16,h_rt=12:00:00"
+
   # SGE: flags for training a model
   num_devices=2
   resource_flags_train="-q gpu.q@@1080 -l gpu=2,mem_free=20g,h_rt=504:00:00"
