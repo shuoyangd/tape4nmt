@@ -18,13 +18,13 @@ Doing this by hand, from my own experiences in several evaluation campaigns, is 
 
 `tape4nmt` also fixes a lot of problems EMS has. For example, EMS consolidated workflow management and workflow definition into one gigantic perl script, with some regular expressions failing about every 6 months. `tape4nmt` however, uses `DuctTape` for workflow management and only take cares of workflow definition. It also keeps data/workflow separation in mind throughout its design. Besides, hopefully you'll also find `tape4nmt` has a better structure for maintainence.
 
-`tape4nmt` aims to support all major NMT toolkits on the market. By default we use [fairseq](https://github.com/pytorch/fairseq), but we currently support [sockeye](https://github.com/awslabs/sockeye) as well, while [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) support is in the near future. If your favorite NMT toolkit hasn't been supported yet, you should still be able to make a moderate amount of modifications and work mostly with this pipeline. (If you actually did, please consider contributing your effort!)
+`tape4nmt` aims to support all major NMT toolkits on the market. We currently support [fairseq](https://github.com/pytorch/fairseq), [sockeye](https://github.com/awslabs/sockeye), and [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py), with [marian](https://github.com/marian-nmt/marian) support in the near future. Also, if your favorite NMT toolkit hasn't been supported yet, you should only need to create one extra tape file containing toolkit-specific operations (binarize data, train, and decode). (If you actually did, please consider contributing your effort!)
 
 ### I'm sold. How do I start to use it?
 
-Before you start, note that this workflow is tested on the sun grid manager configured on [CLSP](https://www.clsp.jhu.edu) grid out-of-box. But don't worry, you may only need to slightly tweak `action_flags` and `resource_flags` in the `main.tconf` file to be able to use this on other grid that uses sun grid manager. Or in the worse case, you could substitute all submitter with `"bash"` to run everything locally or define your own submitter!
-
 The workflow is pre-configured to build an IWSLT German-English system with fairseq. Follow this [tutorial](https://github.com/shuoyangd/tape4nmt/blob/master/TUTORIAL.md) to get started.
+
+Note that this workflow is tested on the sun grid manager configured on [CLSP](https://www.clsp.jhu.edu) grid out-of-box, so you may need to slightly tweak `action_flags` and `resource_flags` in the `main.tconf` file to be able to use this on other grid that uses sun grid manager. Or in the worse case, you could substitute all submitter with `"bash"` to run everything locally, or define your own submitter for grid manager of your choice!
 
 ### Hey I found your workflow does not do xxx...
 
