@@ -44,7 +44,8 @@ task apply_sentencepiece : sentencepiece
   < in=$recased_data
   < model=$model@train_sentencepiece
   > out 
+  :: sentencepiece_alpha=@
   :: pyenv=@ {
 
-  cat $in | ${sentencepiece}/build/src/spm_encode --model $model --output_format sample_piece > $out
+  cat $in | ${sentencepiece}/build/src/spm_encode --model $model --output_format sample_piece --alpha $sentencepiece_alpha > $out
 }
