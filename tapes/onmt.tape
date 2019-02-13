@@ -4,7 +4,8 @@ task binarize_data : onmt
     < dev_src_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:src]  # FIXME
     < dev_trg_in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:dev,side:trg]  # FIXME
     > out
-    :: .submitter="sge" .action_flags=$action_flags .resource_flags=$resource_flags_16g {
+    :: .submitter="sge" .action_flags=$action_flags .resource_flags=$resource_flags_16g
+    :: pyenv=@ {
 
   python $onmt/preprocess.py -train_src $train_src_in -train_tgt $train_trg_in -valid_src $dev_src_in -valid_tgt $dev_trg_in -save_data $out
 
@@ -33,10 +34,10 @@ task train : onmt
     :: train_learning_rate=@
     :: train_encoder_type=@ {
 
-  export device=`free-gpu`
-  echo $device
 
-  cmd="python $onmt/train.py -data $in -save_model $out -gpuid $device"
+  sleep `od -An -N1 -i /dev/random` # avoid GPU clash
+
+  cmd="python $onmt/train.py -data $in -save_model $out"
 
   if [ ! -z $train_train_from ] ; then
     cmd=$cmd" -train_from $train_from"
@@ -50,15 +51,12 @@ task train : onmt
     cmd=$cmd" -start_epoch $start_epoch"
   fi
 
-  if [ ! -z $train_brnn ] ; then
-    cmd=$cmd" -brnn"
-  fi
-
   if [ ! -z $train_encoder_type ] ; then
     cmd=$cmd" -encoder_type $train_encoder_type"
   fi
 
   cmd=$cmd" -layers $train_layers -rnn_size $train_rnn_size -word_vec_size $train_word_vec_size -batch_size $train_batch_size -epochs $train_epochs -optim $train_optim -dropout $train_dropout -learning_rate $train_learning_rate"
+  cmd=$cmd" -gpuid `free-gpu`"
   echo $cmd
   $cmd
 
@@ -124,6 +122,8 @@ task decode : onmt
     :: .action_flags="-m ae -M dings@jhu.edu -q g.q"
     :: .resource_flags="-l 'hostname=c*,gpu=1,mem_free=4g,ram_free=4g'"
     :: pyenv=@ {
+
+  sleep `od -An -N1 -i /dev/random` # avoid GPU clash
 
   export device=`free-gpu`
   echo $device

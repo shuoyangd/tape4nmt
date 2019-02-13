@@ -136,7 +136,7 @@ global {
   ##################################################################################################
 
   # sentencepiece options
-  sentencepiece_vocab_size=8000
+  sentencepiece_vocab_size=(SentencePieceOps: 8000 49500)
   sentencepiece_model_type="unigram"
 
   # no of BPE operations
