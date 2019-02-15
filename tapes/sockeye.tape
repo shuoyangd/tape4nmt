@@ -127,10 +127,14 @@ task package_model : sockeye mosesdecoder sockeye_scripts
   < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
   < casing_model=(Casing: actual="/dev/null" lower_source="/dev/null" true=$out@train_truecaser)
   < model=$model@train
+  < observed_masks=(DoMasking: no="/dev/null" yes=$masks@mask[DataSection:train])
   > bundle="bundle"
   :: casing=(Casing: actual true lower_source)
   :: tokenize=(DoTokenize: yes="yes" no="no")
   :: mask=(DoMasking: no="no" yes="yes")
+  :: masking_pattern_files=@
+  :: masking_dict_files=@
+  :: masking_add_index=@
   :: subword_method=(SubwordMethod: sentencepiece bpe none)
   :: use_factors=(SourceFactors: no yes)
   :: source_factors=@
@@ -162,9 +166,15 @@ task package_model : sockeye mosesdecoder sockeye_scripts
 
   if [[ $mask == "yes" ]]; then
     mkdir masker
-    pre_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json --pattern_files $masking_pattern_files"
+    pre_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json"
 
-    if [ ! -z "$masking_add_index" ] ; then
+    if [[ $masking_pattern_files != "/dev/null" ]]; then
+      pre_cmd+=" --pattern-files $masking_pattern_files"
+    fi
+    if [[ $masking_dict_files != "/dev/null" ]]; then
+      pre_cmd+=" --dict-files $masking_dict_files"
+    fi
+    if [[ ! -z "$masking_add_index" ]] ; then
       pre_cmd+=" --add-index"
     fi
   fi
@@ -204,26 +214,32 @@ EOF
   if [[ $subword_model != "/dev/null" ]]; then
     cp $subword_model subword.model
     prepare_subword_arg="--subword-type $subword_method --subword-model \$rundir/subword.model"
+
+    if [[ $mask == "yes" && $subword_method == "bpe" ]]; then
+      prepare_subword_arg+=" --glossary $(cat $observed_masks)"
+    fi
   fi
 
   pre_cmd+=" | \$rundir/sockeye_scripts/preparation/prepare.py $prepare_casing_arg $prepare_subword_arg"
 
   if [[ $use_factors == "yes" ]]; then
-    pre_cmd+="| PYTHONPATH=\$rundiro/sockeye_scripts python3 -m source_factors.compute --json $source_factors"
+    pre_cmd+=" | PYTHONPATH=\$rundir/sockeye_scripts python3 -m source_factors.compute --json $source_factors"
   fi  
 
   if [[ $subword_method != "none" ]]; then
       post_cmd+=" | \$rundir/sockeye_scripts/preparation/prepare.py --input-field translation --undo --subword-type $subword_method"
   fi
 
-  # Extract translation
-  post_cmd+=" | \$rundir/sockeye_scripts/preparation/extract_json.py -f text"
-
   if [[ $tokenize == "yes" ]]; then
-      post_cmd+=" | \$rundir/tokenizer/detokenizer.perl -q -l $TRG 2>/dev/null"
+    post_cmd+=" | \$rundir/sockeye_scripts/preparation/wrap_in_json text detok_translation \"\$rundir/tokenizer/detokenizer.perl -q -b -l $TRG\""
   fi
 
-  # TODO: masking
+  if [[ $mask == "yes" ]]; then
+    post_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json --unmask"
+  fi
+
+  # Last step: extract translation
+  post_cmd+=" | \$rundir/sockeye_scripts/preparation/extract_json.py -f text"
 
   echo $pre_cmd >> pre.sh
   echo $post_cmd >> post.sh

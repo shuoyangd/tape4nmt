@@ -28,18 +28,26 @@ task apply_bpe : subword_nmt
   < src_in=$recased_data_src
   < trg_in=$recased_data_trg
   < model=$model@train_bpe
+  < observed_masks=(DoMasking: no="/dev/null" yes=$masks@mask[DataSection:train])
   > src
   > trg
+  :: masking=(DoMasking: no yes)
   :: pyenv=@ {
 
-  subword-nmt apply-bpe --codes $model --input $src_in --output $src &
-  subword-nmt apply-bpe --codes $model --input $trg_in --output $trg &
+  glossary_flag=""
+  if [[ $masking == "yes" ]]; then
+    glossary_flag="--glossaries $(cat $observed_masks)"
+  fi
+
+  subword-nmt apply-bpe --codes $model $glossary_flag --input $src_in --output $src &
+  subword-nmt apply-bpe --codes $model $glossary_flag --input $trg_in --output $trg &
   wait
 }
 
 task train_sentencepiece : sentencepiece
   < src_in=$recased_data_src[DataSection:train]
   < trg_in=$recased_data_trg[DataSection:train]
+  < observed_masks=(DoMasking: no="/dev/null" yes=$masks@mask[DataSection:train])
   > model="sp.model"
   > vocab="sp.vocab"
   :: sentencepiece_vocab_size=@
@@ -49,7 +57,12 @@ task train_sentencepiece : sentencepiece
   :: .resource_flags=$resource_flags_16cpu
   :: .action_flags=@ {
 
-  ${sentencepiece}/build/src/spm_train --input $src_in,$trg_in --model_prefix sp --vocab_size $sentencepiece_vocab_size --character_coverage 1.0 --model_type $sentencepiece_model_type
+  glossary_flag=""
+  if [[ $observed_masks != "/dev/null" ]]; then
+    glossary_flag="--user_defined_symbols $(cat $observed_masks)"
+  fi  
+
+  ${sentencepiece}/build/src/spm_train --input $src_in,$trg_in --model_prefix sp --vocab_size $sentencepiece_vocab_size $glossary_flag --character_coverage 1.0 --model_type $sentencepiece_model_type
 }
 
 task apply_sentencepiece : sentencepiece

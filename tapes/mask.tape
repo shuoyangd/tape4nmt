@@ -14,23 +14,33 @@ task mask : sockeye_scripts tools
   < trg_in=$raw_data_trg
   > src
   > trg
+  > masks
   :: section=(DataSection: train dev test)
   :: masking_add_index=@
+  :: masking_dict_files=@
   :: masking_pattern_files=@ {
 
-  if [[ $section == "train" ]]; then
-    paste $src_in $trg_in > in
-  else
-    ln -s $src_in in
+  # This always masks in parallel, but note that this is used
+  # only for train and dev, since test is recomputed via the packaged
+  # model. For dev, we mask in parallel since validation scores work
+  # on the raw data anyway.
+
+  cmd="python3 $sockeye_scripts/masking/mask_terms.py"
+  if [[ $masking_pattern_files != "/dev/null" ]]; then
+    cmd+=" --pattern-files $masking_pattern_files"
   fi
 
-  cmd="cat in | python $sockeye_scripts/masking/mask_terms.py --pattern_files $masking_pattern_files"
+  if [[ $masking_dict_files != "/dev/null" ]]; then
+    cmd+=" --dict-files $masking_dict_files"
+  fi
 
-  if [[ $masking_add_index -eq "yes" ]]; then
+  if [[ $masking_add_index == "yes" ]]; then
     cmd+=" --add-index"
   fi
 
-  $cmd | $tools/bin/unpaste $src $trg
+  # for non-training, $trg will be a file full of blank lines
+  paste $src_in $trg_in | $cmd | $tools/bin/unpaste $src $trg
 
-  rm -f $in
+  # write the set of observed masks
+  cat $src $trg | perl -pe 's/ /\n/g' | grep '^__.*__$' | sort -u > $masks
 }
