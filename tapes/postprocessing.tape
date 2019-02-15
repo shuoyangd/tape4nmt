@@ -75,21 +75,10 @@ task decharacterize : tools
 
 task demask : sockeye_scripts tools
     < sys_in=$detokenized_output
-    < orig_src=$raw_data[DataSection:test,side:src]
-    < mask_src=$out@dummy_aggregate_mask[DataSection:test,side:src]
+    < orig_src=$raw_data_src[DataSection:test]
+    < mask_src=$masked_data_src[DataSection:test]
     > out {
 
     paste $sys_in $orig_src $mask_src > in
     python $sockeye_scripts/masking/mask_terms.py -u < in > $out
-}
-
-# do not support merge for the moment
-task wrap_xml : mosesdecoder
-    < in=$detokenized_output
-    < wrap_template=$out@download_or_link[DataSection:test,side:src]
-    > out
-    :: trg_lang=$TRG
-    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
-
-  $mosesdecoder/scripts/ems/support/wrap-xml.perl $trg_lang $wrap_template < $in > $out
 }

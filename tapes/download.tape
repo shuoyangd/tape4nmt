@@ -1,60 +1,62 @@
 global {
 
-  raw_data=$out@download_or_link
-  raw_data_test_src=$out@download_or_link[DataSection:test,side:src]
-  raw_data_test_trg=$out@download_or_link[DataSection:test,side:trg]
+  raw_data_src=$src@download_or_link
+  raw_data_trg=$trg@download_or_link
 
-  dev_text=(SgmDev:
-    no=$out@download_or_link[DataSection:dev]
-    yes=(side: src=$src_out@dev_text_from_sgm trg=$trg_out@dev_text_from_sgm)
-  )
+  raw_data_train_src=$src@download_or_link[DataSection:train]
+  raw_data_train_trg=$trg@download_or_link[DataSection:train]
 
-  test_text=(SgmTest:
-    no=$out@download_or_link[DataSection:test]
-    yes=(side: src=$src_out@test_text_from_sgm trg=$trg_out@test_text_from_sgm)
-  )
+  raw_data_test_src=$src@download_or_link[DataSection:test]
+  raw_data_test_trg=$trg@download_or_link[DataSection:test]
+
+  raw_data_dev_src=$src@download_or_link[DataSection:dev]
+  raw_data_dev_trg=$trg@download_or_link[DataSection:dev]
 }
 
-task download_or_link : tools
-    :: in=(DataSection: train=$train_prefix dev=$dev_prefix test=$test_prefix)
-    :: side=(side: src trg)
-    :: SRC=@
-    :: TRG=@
-    :: section=(DataSection: train dev test)
-    :: testing=(TestMode: no yes)
-    > out
-   :: pyenv=@ {
+task download_or_link : tools mosesdecoder
+  > src
+  > trg
+  :: prefixes=(DataSection: train=$train_prefix dev=$dev_prefix test=$test_prefix)
+  :: SRC=@
+  :: TRG=@
+  :: section=(DataSection: train dev test)
+  :: testing=(TestMode: no yes)
+  :: train_clean_ratio=@
+  :: train_maxlen=@
+  :: pyenv=@ {
 
-  if [[ $side == "src" ]]; then
-    side="src"
-    lang=$SRC
-  elif [[ $side == "trg" ]]; then
-    side="ref"
-    lang=$TRG
-  fi
-
-  rm -f $out
-
-  for infile in $in; do
-    if [[ $infile == sacrebleu://* ]]; then
+  rm -f $src $trg
+  for prefix in $prefixes; do
+    if [[ $prefix == sacrebleu://* ]]; then
       # format: "sacrebleu://test-set" (language pair taken from $SRC and $TRG)
 
-      # Removes the "sacrebleu://" prefix from $in
-      test_set=${infile##*://}
-      sacrebleu -t ${test_set} -l ${SRC}-${TRG} --echo $side >> $out
+      # Remove "sacrebleu://" from the prefix
+      test_set=${prefix##*://}
+      sacrebleu -t ${test_set} -l ${SRC}-${TRG} --echo both | ${tools}/bin/unpaste -a $src $trg
+      if [[ $testing == "yes" ]]; then
+        head -n 20 $src > t; mv t $src
+        head -n 20 $trg > t; mv t $trg
+      fi
     else
-      infile="$infile.$lang"
-
       if [[ $testing == "yes" ]]; then
         if [[ $section == "train" ]]; then
           numlines=10000
         else
-          numlines=100
+          numlines=20
         fi
-        head -n $numlines $infile >> $out
+        head -n $numlines $prefix.$SRC >> $src    
+        head -n $numlines $prefix.$TRG >> $trg
       else
-        zcat -f $infile >> $out
+        ${tools}/bin/zpaste $prefix.{$SRC,$TRG} | ${tools}/bin/unpaste -a $src $trg
       fi
     fi
   done
+
+  mv $src corpus.$SRC
+  mv $trg corpus.$TRG
+
+  ${mosesdecoder}/scripts/training/clean-corpus-n.perl corpus $SRC $TRG cleaned $train_clean_ratio $train_maxlen
+
+  mv cleaned.$SRC $src
+  mv cleaned.$TRG $trg
 }

@@ -1,6 +1,6 @@
 task compute_source_factors : sockeye_scripts
-  < subword_in=$prepared_data
-  < tok_in=$tokenized_data
+  < subword_in=$prepared_data_src
+  < tok_in=$tokenized_data_src
   > factor_files="factors.txt"
   :: source_factors=@
   :: .submitter=shell {
@@ -19,7 +19,12 @@ task compute_source_factors : sockeye_scripts
     # First write to tmpfile
     tmpfile=$(mktemp tmp.$factor.XXXXXX)
     tmpfiles+=" $tmpfile"
-    python3 -m source_factors.compute $factor -i $tok_in -o $tmpfile
+
+    if [[ $factor == "subword" ]]; then
+      python3 -m source_factors.compute $factor -i $subword_in -o $tmpfile
+    else
+      python3 -m source_factors.compute $factor -i $tok_in -o $tmpfile
+    fi
   done
 
   # combine them all

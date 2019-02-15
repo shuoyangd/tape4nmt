@@ -1,23 +1,26 @@
+global {
+  cleaned_data_src=$src@train_clean
+  cleaned_data_trg=$trg@train_clean
+}
+
 task train_clean : mosesdecoder
     < src_in=$out@download_or_link[DataSection:train,side:src]
     < trg_in=$out@download_or_link[DataSection:train,side:trg]
-    > src_out
-    > trg_out
+    > src
+    > trg
     :: SRC=@
     :: TRG=@
-    :: Ratio=@
-    :: MaxLen=@
+    :: train_clean_ratio=@
+    :: train_maxlen=@
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
-  mkdir -p tmp
-  filename=$(basename $src_in)
-  cp $src_in tmp/$filename.$SRC
-  cp $trg_in tmp/$filename.$TRG
-  in=tmp/$filename
+  ln -s $src_in corpus.$SRC
+  ln -s $trg_in corpus.$TRG
 
-  $mosesdecoder/scripts/training/clean-corpus-n.perl $in $SRC $TRG $src_out $Ratio $MaxLen
-  mv $src_out.$SRC $src_out
-  mv $src_out.$TRG $trg_out
+  $mosesdecoder/scripts/training/clean-corpus-n.perl corpus $SRC $TRG cleaned $train_clean_ratio $train_maxlen
+
+  mv cleaned.$SRC $src_out
+  mv cleaned.$TRG $trg_out
 }
 
 task train_sample : tools

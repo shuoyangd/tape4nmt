@@ -1,47 +1,59 @@
 global {
-  tokenized_data=(DoTokenize:
-    yes=$out@tokenize
-    no=$raw_data
-   )
+  tokenized_data_src=(DoTokenize:
+    yes=$src@tokenize
+    no=$masked_data_src
+  )
+  tokenized_data_trg=(DoTokenize:
+    yes=$trg@tokenize
+    no=$masked_data_trg
+  )
 }
 
-func tokenize : mosesdecoder tools sockeye_scripts # stanford_seg
-    < in
-    > out
-    :: Lang {
+task tokenize : mosesdecoder tools sockeye_scripts
+  < src_in=$masked_data_src
+  < trg_in=$masked_data_trg
+  > src
+  > trg
+  :: SRC=@ TRG=@
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
-  if [[ $Lang == "zh" ]]; then
-    cat $in | ${sockeye_scripts}/zh/segment-chinese.pl \
-      | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
-      | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
-      | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
-      > $out
-  else
-    cat $in \
-      | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $Lang \
-      | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
-      | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $Lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
-      > $out
-  fi
+  for lang in $SRC $TRG; do
+    if [[ $lang == $SRC ]]; then
+      get=$src_in
+      put=$src
+    else
+      get=$trg_in
+      put=$trg
+    fi
+    if [[ $lang == "zh" ]]; then
+      cat $get | ${sockeye_scripts}/zh/segment-chinese.py \
+        | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $lang \
+        | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
+        | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
+        > $put &
+    else
+      cat $get \
+        | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $lang \
+        | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
+        | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
+        > $put &
+    fi
+  done
+
+  wait
 }
 
-task tokenize calls tokenize : mosesdecoder tools # stanford_seg
-    < in=$raw_data
-    > out
-    :: Lang=(side: src=$SRC trg=$TRG)
-    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags
+# task characterize : tools
+#     < in=$out@tokenize
+#     > out
+#     :: pyenv=@
+#     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
 
-task characterize : tools
-    < in=$out@tokenize
-    > out
-    :: pyenv=@
-    :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {
+#   if [ ! -z $pyenv ] ; then
+#     set +u
+#     source $pyenv
+#     set -u
+#   fi
 
-  if [ ! -z $pyenv ] ; then
-    set +u
-    source $pyenv
-    set -u
-  fi
-
-  python $tools/characterize.py < $in > $out
-}
+#   python $tools/characterize.py < $in > $out
+# }

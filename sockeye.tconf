@@ -82,7 +82,7 @@ global {
   # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
   # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
   # the path to the script that should be loaded.
-  pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+  pyenv="conda:sockeye"
 
   ##################################################################################################
   # Preprocessing options
@@ -97,20 +97,18 @@ global {
   bpe_operations=32000
 
   # options for cleaning training data
-  MaxLen=100
-  Ratio=1
+  train_maxlen=100
+  train_clean_ratio=1
 
   use_cpu=(TestMode: no yes)
 }
 
 plan test {
-  reach multi_bleu, sacrebleu via 
-    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: *) * (SourceFactors: yes) *
-    (TestMode: yes)
+  reach sacrebleu via 
+    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: lower_source) * (SourceFactors: yes) * (TestMode: yes)
 
-  # reach sacrebleu via 
-  #   (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: actual) *
-  #   (TestMode: yes)
+  reach sacrebleu via 
+    (SubwordMethod: sentencepiece) * (DoTokenize: no) * (Casing: actual) * (SourceFactors: no) * (TestMode: yes)
 }
 
 plan transformer {

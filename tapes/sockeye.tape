@@ -1,10 +1,10 @@
 task prepare_data : sockeye
-    < train_src_in=$prepared_data[DataSection:train,side:src]
-    < train_trg_in=$prepared_data[DataSection:train,side:trg]
+    < train_src_in=$prepared_data_src[DataSection:train]
+    < train_trg_in=$prepared_data_trg[DataSection:train]
     < factor_files=(SourceFactors: no="/dev/null" yes=$factor_files@compute_source_factors[DataSection:train])
     > data
     :: pyenv=@
-    :: train_max_sent_length=$MaxLen
+    :: train_maxlen=@
     :: source_factors=@
     :: seed=1235813
     :: .submitter=$submitter
@@ -25,7 +25,7 @@ task prepare_data : sockeye
       --shared-vocab \
       --word-min-count 2:2 \
       --bucket-width 10 \
-      --max-seq-len $train_max_sent_length \
+      --max-seq-len $train_maxlen \
       --num-samples-per-shard 10000000 \
       --seed $seed \
       --output data
@@ -33,8 +33,8 @@ task prepare_data : sockeye
 
 task train : sockeye
     < prepared_data=$data@prepare_data
-    < dev_src=$prepared_data[DataSection:dev,side:src]
-    < dev_trg=$prepared_data[DataSection:dev,side:trg]
+    < dev_src=$prepared_data_src[DataSection:dev]
+    < dev_trg=$prepared_data_trg[DataSection:dev]
     < dev_factor_files=(SourceFactors: no="/dev/null" yes=$factor_files@compute_source_factors[DataSection:dev])
     > model
     :: pyenv=@
@@ -125,7 +125,7 @@ task train : sockeye
 # Ideally this should be used for evaluation.
 task package_model : sockeye mosesdecoder sockeye_scripts
   < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
-  < casing_model=(Casing: actual="/dev/null" true=$out@train_truecaser lower_source="/dev/null")
+  < casing_model=(Casing: actual="/dev/null" lower_source="/dev/null" true=$out@train_truecaser)
   < model=$model@train
   > bundle="bundle"
   :: casing=(Casing: actual true lower_source)
@@ -209,7 +209,7 @@ EOF
   pre_cmd+=" | \$rundir/sockeye_scripts/preparation/prepare.py $prepare_casing_arg $prepare_subword_arg"
 
   if [[ $use_factors == "yes" ]]; then
-    pre_cmd+="| \$rundir/sockeye_scripts/source_factors/compute.py --json $source_factors"
+    pre_cmd+="| PYTHONPATH=\$rundiro/sockeye_scripts python3 -m source_factors.compute --json $source_factors"
   fi  
 
   if [[ $subword_method != "none" ]]; then
@@ -265,6 +265,9 @@ task decode_with_bundle : sockeye tools
     device_flag="--device-ids -1"
   fi
 
+  ln -s $in corpus.in
+  ln -s ${bundled_model} bundle
+
   cat $in | ${bundled_model}/translate.sh \
     $device_flag \
     --disable-device-locking \
@@ -277,7 +280,7 @@ task decode_with_bundle : sockeye tools
 # the target input here is used to compute naïve and ppl,
 # that's why we need post-bpe target input
 task decode : sockeye tools
-    < in=$prepared_data[DataSection:test,side:src]
+    < in=$prepared_data_src[DataSection:test]
     < model=$model@train
     < factor_files=(SourceFactors: no="/dev/null" yes=$factor_files@compute_source_factors[DataSection:test])
     > out="out"

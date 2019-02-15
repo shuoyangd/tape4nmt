@@ -1,28 +1,36 @@
 global {
-  masked_data=(DoMasking:
-    no=$tokenized_data
-    yes=(side:
-      src=$src_out@mask
-      trg=$trg_out@mask
-    )
+  masked_data_src=(DoMasking:
+    no=$raw_data_src
+    yes=$src@mask
+  )
+  masked_data_trg=(DoMasking:
+    no=$raw_data_trg
+    yes=$trg@mask
   )
 }
 
 task mask : sockeye_scripts tools
-  < src_in=$tokenized_data[side:src]
-  < trg_in=$tokenized_data[side:trg]
-  > src_out
-  > trg_out
+  < src_in=$raw_data_src
+  < trg_in=$raw_data_trg
+  > src
+  > trg
+  :: section=(DataSection: train dev test)
   :: masking_add_index=@
   :: masking_pattern_files=@ {
 
+  if [[ $section == "train" ]]; then
     paste $src_in $trg_in > in
-    cmd="cat in | python $sockeye_scripts/masking/mask_terms.py --pattern_files $masking_pattern_files"
+  else
+    ln -s $src_in in
+  fi
 
-    if [[ $masking_add_index -eq "yes" ]]; then
-      cmd+=" --add-index"
-    fi
+  cmd="cat in | python $sockeye_scripts/masking/mask_terms.py --pattern_files $masking_pattern_files"
 
-    echo $cmd
-    $cmd | $tools/bin/unpaste $src_out $trg_out
+  if [[ $masking_add_index -eq "yes" ]]; then
+    cmd+=" --add-index"
+  fi
+
+  $cmd | $tools/bin/unpaste $src $trg
+
+  rm -f $in
 }
