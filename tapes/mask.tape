@@ -42,5 +42,5 @@ task mask : sockeye_scripts tools
   paste $src_in $trg_in | $cmd | $tools/bin/unpaste $src $trg
 
   # write the set of observed masks
-  cat $src $trg | perl -pe 's/ /\n/g' | grep '^__.*__$' | sort -u > $masks
+  cat $src $trg | perl -pe 's/ /\n/g' | perl -ne 'if (/^__[A-Z0-9]+(_\d+)?__$/) { print }' > $masks
 }
