@@ -50,7 +50,8 @@ global {
 
   # MASKING
   masking_add_index=no
-  masking_pattern_files=""
+  masking_pattern_files="/home/hltcoe/mpost/code/tape4nmt/patterns.txt"
+  masking_dict_files="/dev/null"
 
   ##################################################################################################
   # Job submission parameters
@@ -105,10 +106,10 @@ global {
 
 plan test {
   reach sacrebleu via 
-    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: lower_source) * (SourceFactors: yes) * (TestMode: yes)
+    (SubwordMethod: bpe) * (DoTokenize: yes) * (DoMasking: *) * (Casing: lower_source) * (SourceFactors: yes) * (TestMode: yes)
 
   reach sacrebleu via 
-    (SubwordMethod: sentencepiece) * (DoTokenize: no) * (Casing: actual) * (SourceFactors: no) * (TestMode: yes)
+    (SubwordMethod: sentencepiece) * (DoTokenize: no) * (DoMasking: yes) * (Casing: actual) * (SourceFactors: no) * (TestMode: yes)
 }
 
 plan transformer {
