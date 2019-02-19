@@ -192,9 +192,9 @@ rundir=\$(dirname \$0)
   | \$rundir/tokenizer.perl -b -l $SRC -no-escape -protected \$rundir/basic-protected-patterns -q
 EOF
     chmod 755 tokenizer/moses_tokenizer
-    if [[ $SRC == "zh" ]]; then
-      cp ${sockeye_scripts}/zh/segment-chinese.py tokenizer/
-      pre_cmd+=" | \$rundir/tokenizer/segment-chinese.py --json"
+    if [[ $SRC == "zh" || $SRC == "ja" || $SRC == "ko" ]]; then
+      cp ${sockeye_scripts}/cjk/segment-cjk.py tokenizer/
+      pre_cmd+=" | \$rundir/tokenizer/segment-cjk.py --json"
     fi
 
     pre_cmd+=" | \$rundir/sockeye_scripts/preparation/wrap_in_json text tok_text \$rundir/tokenizer/moses_tokenizer"

@@ -25,8 +25,8 @@ task tokenize : mosesdecoder tools sockeye_scripts
       get=$trg_in
       put=$trg
     fi
-    if [[ $lang == "zh" ]]; then
-      cat $get | ${sockeye_scripts}/zh/segment-chinese.py \
+    if [[ $lang == "zh" || $lang == "ja" || $lang == "ko" ]]; then
+      cat $get | ${sockeye_scripts}/cjk/segment-cjk.py \
         | ${mosesdecoder}/scripts/tokenizer/normalize-punctuation.perl -l $lang \
         | ${mosesdecoder}/scripts/tokenizer/remove-non-printing-char.perl \
         | ${mosesdecoder}/scripts/tokenizer/tokenizer.perl -l $lang -no-escape -protected ${mosesdecoder}/scripts/tokenizer/basic-protected-patterns -q \
