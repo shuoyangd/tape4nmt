@@ -5,7 +5,7 @@ package sockeye_scripts :: .versioner=git .repo="/home/hltcoe/mpost/code/sockeye
 
 package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD { 
   # This is needed to prevent the Moses tokenizer from splitting out masks
-  echo '__[A-Z0-9]+(_\d+)?__' >> scripts/tokenizer/basic-protected-patterns
+  echo '__[A-Za-z0-9]+(_\d+)?__' >> scripts/tokenizer/basic-protected-patterns
 }
 
 package sentencepiece :: .versioner=git .repo="https://github.com/google/sentencepiece" .ref="tags/v0.1.8" {
