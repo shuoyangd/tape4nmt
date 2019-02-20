@@ -32,16 +32,18 @@ task apply_bpe : subword_nmt
   > src
   > trg
   :: masking=(DoMasking: no yes)
-  :: pyenv=@ {
+  :: pyenv=@
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu {
 
   glossary_flag=""
   if [[ $masking == "yes" ]]; then
-    glossary_flag="--glossaries $(cat $observed_masks)"
+    glossary_flag="--glossaries $(cat $observed_masks | perl -pe 's/\n/ /g')"
   fi
 
-  subword-nmt apply-bpe --codes $model $glossary_flag --input $src_in --output $src &
-  subword-nmt apply-bpe --codes $model $glossary_flag --input $trg_in --output $trg &
-  wait
+  echo "GLOSSARY FLAG: $glossary_flag"
+
+  cat $src_in | parallel -j 10 -k --block-size 10k --pipe "subword-nmt apply-bpe --codes $model $glossary_flag" > $src
+  cat $trg_in | parallel -j 10 -k --block-size 10k --pipe "subword-nmt apply-bpe --codes $model $glossary_flag" > $trg
 }
 
 task train_sentencepiece : sentencepiece

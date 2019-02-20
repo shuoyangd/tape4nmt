@@ -216,7 +216,7 @@ EOF
     prepare_subword_arg="--subword-type $subword_method --subword-model \$rundir/subword.model"
 
     if [[ $mask == "yes" && $subword_method == "bpe" ]]; then
-      prepare_subword_arg+=" --subword-glossary $(cat $observed_masks)"
+      prepare_subword_arg+=" --subword-glossary $(cat $observed_masks | perl -pe 's/\n/ /g')"
     fi
   fi
 
