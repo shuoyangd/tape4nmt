@@ -18,7 +18,8 @@ task mask : sockeye_scripts tools
   :: section=(DataSection: train dev test)
   :: masking_add_index=@
   :: masking_dict_files=@
-  :: masking_pattern_files=@ {
+  :: masking_pattern_files=@
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu {
 
   # This always masks in parallel, but note that this is used
   # only for train and dev, since test is recomputed via the packaged
@@ -39,7 +40,7 @@ task mask : sockeye_scripts tools
   fi
 
   # for non-training, $trg will be a file full of blank lines
-  paste $src_in $trg_in | $cmd | $tools/bin/unpaste $src $trg
+  paste $src_in $trg_in | parallel -j 10 -k --block-size 10k --pipe "$cmd" | $tools/bin/unpaste $src $trg
 
   # write the set of observed masks
   cat $src $trg | perl -pe 's/ /\n/g' | perl -ne 'if (/^__[A-Z0-9]+(_\d+)?__$/) { print }' | sort -u > $masks
