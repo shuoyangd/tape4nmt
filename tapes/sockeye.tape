@@ -238,9 +238,6 @@ EOF
     post_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json --unmask"
   fi
 
-  # Last step: extract translation
-  post_cmd+=" | \$rundir/sockeye_scripts/preparation/extract_json.py -f text"
-
   echo $pre_cmd >> pre.sh
   echo $post_cmd >> post.sh
 
@@ -290,7 +287,7 @@ task decode_with_bundle : sockeye tools
     --beam-size $test_beam_size \
     --batch-size $test_batch_size \
     --max-input-len $test_max_sent_length \
-    > $out 2> $log
+    > ${out}.json | jq -r .text > $out 2> $log
 }
 
 # the target input here is used to compute naïve and ppl,
