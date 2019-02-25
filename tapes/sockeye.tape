@@ -287,7 +287,7 @@ task decode_with_bundle : sockeye tools
     --beam-size $test_beam_size \
     --batch-size $test_batch_size \
     --max-input-len $test_max_sent_length \
-    > ${out}.json | jq -r .text > $out 2> $log
+    | tee ${out}.json | jq -r .text > $out 2> $log
 }
 
 # the target input here is used to compute naïve and ppl,
