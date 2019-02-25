@@ -40,7 +40,7 @@ submitter sge :: action_flags
     echo "#$ $action_flags" >> $wrapper
     echo "#$ -j y" >> $wrapper
     echo "#$ -o $PWD/job.out" >> $wrapper
-    echo "#$ -N $CONFIGURATION-$TASK-$REALIZATION" >> $wrapper
+    echo "#$ -N $TASK-$REALIZATION-$CONFIGURATION" >> $wrapper
     echo "" >> $wrapper
 
     # Bash flags aren't necessarily passed into the scheduler
