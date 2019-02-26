@@ -53,6 +53,9 @@ global {
   masking_pattern_files="/home/hltcoe/mpost/code/tape4nmt/patterns.txt"
   masking_dict_files="/dev/null"
 
+  # EVALUATION
+  sacrebleu_args=""
+
   ##################################################################################################
   # Job submission parameters
   ##################################################################################################

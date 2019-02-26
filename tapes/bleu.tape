@@ -19,12 +19,26 @@ task multi_bleu : mosesdecoder
 }
 
 task sacrebleu : sacrebleu
-    < in=$out@decode_with_bundle
-    < ref=$raw_data_test_trg
+    < sys_in=$out@decode_with_bundle
+    < ref_in=$raw_data_test_trg
     > bleu
     > signature
+    :: sacrebleu_args=@
+    :: TRG=@
     :: pyenv=@ {
 
-  cat $in | sacrebleu $ref | cut -d' ' -f1 > $signature
-  cat $in | sacrebleu $ref -b > $bleu
+  # probably should make this a package
+  kytea=~/code/kytea
+
+  sys=$sys_in
+  ref=$ref_in  
+  if [[ $TRG == "ja" ]]; then
+    cat $sys_in | ${kytea}/src/bin/kytea -model ${kytea}/data/model.bin -notags > sys
+    sys=sys
+    cat $ref_in | ${kytea}/src/bin/kytea -model ${kytea}/data/model.bin -notags > ref
+    ref=ref
+  fi
+
+  cat $sys | sacrebleu $sacrebleu_args $ref | cut -d' ' -f1 > $signature
+  cat $sys | sacrebleu $sacrebleu_args $ref -b > $bleu
 }
