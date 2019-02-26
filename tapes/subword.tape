@@ -36,7 +36,7 @@ task apply_bpe : subword_nmt
   :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu {
 
   glossary_flag=""
-  if [[ $masking == "yes" ]]; then
+  if [[ $observed_masks != "/dev/null" ]]; then
     glossary_flag="--glossaries $(cat $observed_masks | perl -pe 's/\n/ /g')"
   fi
 
