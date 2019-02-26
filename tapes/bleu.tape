@@ -33,9 +33,9 @@ task sacrebleu : sacrebleu
   sys=$sys_in
   ref=$ref_in  
   if [[ $TRG == "ja" ]]; then
-    cat $sys_in | ${kytea}/src/bin/kytea -model ${kytea}/data/model.bin -notags > sys
+    cat $sys_in | ${kytea}/src/bin/kytea -model ${kytea}/data/model.bin -out tok > sys
     sys=sys
-    cat $ref_in | ${kytea}/src/bin/kytea -model ${kytea}/data/model.bin -notags > ref
+    cat $ref_in | ${kytea}/src/bin/kytea -model ${kytea}/data/model.bin -out tok > ref
     ref=ref
   fi
 
