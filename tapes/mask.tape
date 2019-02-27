@@ -40,8 +40,8 @@ task mask : sockeye_scripts tools
   fi
 
   # for non-training, $trg will be a file full of blank lines
-  paste $src_in $trg_in | parallel -j 10 -k --block-size 10k --pipe "$cmd" | $tools/bin/unpaste $src $trg
+  paste $src_in $trg_in | parallel -j 10 -k --block-size 10k --pipe "$cmd" | ${tools}/bin/unpaste $src $trg
 
   # write the set of observed masks
-  cat $src $trg | perl -pe 's/ /\n/g' | perl -ne 'if (/^__[A-Z0-9]+(_\d+)?__$/) { print }' | sort -u > $masks
+  cat $src $trg | perl -pe 's/ /\n/g' | perl -ne 'if (/^__[A-Z0-9]+(_\d+)?__$/) { print }' | sort | uniq -c | ${tools}/bin/trim | tee $masks.counts | cut -d' ' -f2 > $masks
 }
