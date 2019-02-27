@@ -52,11 +52,13 @@ task download_or_link : tools mosesdecoder
     fi
   done
 
-  mv $src corpus.$SRC
-  mv $trg corpus.$TRG
+  if [[ $section == "train" ]]; then
+    mv $src corpus.$SRC
+    mv $trg corpus.$TRG
 
-  ${mosesdecoder}/scripts/training/clean-corpus-n.perl corpus $SRC $TRG cleaned $train_clean_ratio $train_maxlen
+    ${mosesdecoder}/scripts/training/clean-corpus-n.perl corpus $SRC $TRG cleaned $train_clean_ratio $train_maxlen
 
-  mv cleaned.$SRC $src
-  mv cleaned.$TRG $trg
+    mv cleaned.$SRC $src
+    mv cleaned.$TRG $trg
+  fi
 }
