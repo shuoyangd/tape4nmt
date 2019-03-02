@@ -28,10 +28,12 @@ task mask : sockeye_scripts tools
 
   cmd="python3 $sockeye_scripts/masking/mask_terms.py"
   if [[ $masking_pattern_files != "/dev/null" ]]; then
+    cp $masking_pattern_files .
     cmd+=" --pattern-files $masking_pattern_files"
   fi
 
   if [[ $masking_dict_files != "/dev/null" ]]; then
+    cp $masking_dict_files .
     cmd+=" --dict-files $masking_dict_files"
   fi
 
@@ -43,5 +45,5 @@ task mask : sockeye_scripts tools
   paste $src_in $trg_in | parallel -j 10 -k --block-size 10k --pipe "$cmd" | ${tools}/bin/unpaste $src $trg
 
   # write the set of observed masks
-  cat $src $trg | perl -pe 's/ /\n/g' | perl -ne 'if (/^__[A-Z0-9]+(_\d+)?__$/) { print }' | sort | uniq -c | ${tools}/bin/trim | tee $masks.counts | cut -d' ' -f2 > $masks
+  cat $src | perl -pe 's/ /\n/g' | perl -ne 'if (/^__[A-Z0-9]+(_\d+)?__$/) { print }' | sort | uniq -c | ${tools}/bin/trim | tee $masks.counts | cut -d' ' -f2 > $masks
 }
