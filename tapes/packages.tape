@@ -2,6 +2,7 @@ package sockeye :: .versioner=git .repo="https://github.com/mjpost/sockeye" .ref
 package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.2.17" { }
 package subword_nmt :: .versioner=pip .package="subword-nmt" .tag="0.3.5" { }
 package sockeye_scripts :: .versioner=git .repo="https://github.com/mjpost/sockeye-scripts/sockeye-scripts" .ref=HEAD { }
+package fast_align :: .versioner=git .repo="https://github.com/clab/fast_align" .ref=HEAD { }
 
 package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD { 
   # This is needed to prevent the Moses tokenizer from splitting out masks
