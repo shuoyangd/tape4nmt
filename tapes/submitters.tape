@@ -24,7 +24,7 @@ submitter shell :: COMMANDS TASK_VARIABLES {
     TIME=$(($STOPPED - $STARTED))
     echo $TIME > ducttape_time.txt
     set -u
-  } 
+  }
 }
 
 # COMMANDS: the bash commands from some task
@@ -83,16 +83,28 @@ EOF
     echo >> $wrapper
 
     echo "$COMMANDS" >> $wrapper
-    echo "echo \$? > exitcode" >> $wrapper  # saves the exit code of the inner process
+    echo "echo \$? > $PWD/exitcode" >> $wrapper  # saves the exit code of the inner process
 
     # Use SGE's -sync option to prevent qsub from immediately returning
-    qsub -V -S /bin/bash $wrapper
+    qsub -V -S /bin/bash $wrapper | grep -Eo "Your job [0-9]+" | grep -Eo "[0-9]+" > $PWD/job_id
+
+    # async job killer
+    exitfn () {
+      trap SIGINT
+      echo "wait until I kill the job `cat $PWD/job_id`"
+      qdel `cat $PWD/job_id`
+      exit
+    }
+
+    trap "exitfn" INT
 
     # don't use -sync y, instead, wait on exitcode
     while [ ! -f $PWD/exitcode ]
     do
-      sleep 60 
+      sleep 15
     done
+
+    trap SIGINT
 
     # restore the exit code saved from the inner process
     EXITCODE=$(cat $PWD/exitcode)
