@@ -87,19 +87,20 @@ EOF
 
     # Use SGE's -sync option to prevent qsub from immediately returning
     qsub -V -S /bin/bash $wrapper | grep -Eo "Your job [0-9]+" | grep -Eo "[0-9]+" > $PWD/job_id
+    job_id=`cat $PWD/job_id`
 
     # async job killer
     exitfn () {
       trap SIGINT
-      echo "wait until I kill the job `cat $PWD/job_id`"
-      qdel `cat $PWD/job_id`
+      echo "wait until I kill the job $job_id"
+      qdel $job_id
       exit
     }
 
     trap "exitfn" INT
 
     # don't use -sync y, instead, wait on exitcode
-    while [ ! -f $PWD/exitcode ]
+    while [ ! -z "`qstat -u $USER | grep $job_id`" ]
     do
       sleep 15
     done
