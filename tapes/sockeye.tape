@@ -174,7 +174,7 @@ task package_model : sockeye mosesdecoder sockeye_scripts
     if [[ $masking_dict_files != "/dev/null" ]]; then
       pre_cmd+=" --dict-files $masking_dict_files"
     fi
-    if [[ ! -z "$masking_add_index" ]] ; then
+    if [[ $masking_add_index == "yes" ]] ; then
       pre_cmd+=" --add-index"
     fi
   fi
