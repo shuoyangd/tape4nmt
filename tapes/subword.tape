@@ -19,7 +19,7 @@ task train_bpe : subword_nmt
   :: SRC=@
   :: TRG=@
   :: pyenv=@
-  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16g {
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16g .pyenv=$pyenv {
 
   subword-nmt learn-joint-bpe-and-vocab -i $src_in $trg_in -s $bpe_operations -o $model --write-vocabulary bpe.vocab.$SRC bpe.vocab.$TRG -v 2> log
 }
@@ -33,7 +33,7 @@ task apply_bpe : subword_nmt
   > trg
   :: masking=(DoMasking: no yes)
   :: pyenv=@
-  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu {
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu .pyenv=$pyenv {
 
   glossary_flag=""
   if [[ $observed_masks != "/dev/null" ]]; then
@@ -57,7 +57,7 @@ task train_sentencepiece : sentencepiece
   :: pyenv=@
   :: .submitter=$submitter
   :: .resource_flags=$resource_flags_16cpu
-  :: .action_flags=@ {
+  :: .action_flags=@ .pyenv=$pyenv {
 
   glossary_flag=""
   if [[ $observed_masks != "/dev/null" ]]; then
@@ -74,7 +74,7 @@ task apply_sentencepiece : sentencepiece
   > src
   > trg
   :: sentencepiece_alpha=@
-  :: pyenv=@ {
+  :: pyenv=@ .pyenv=$pyenv {
 
   cat $src_in | ${sentencepiece}/build/src/spm_encode --model $model --output_format sample_piece --alpha $sentencepiece_alpha > $src &
   cat $trg_in | ${sentencepiece}/build/src/spm_encode --model $model --output_format sample_piece --alpha $sentencepiece_alpha > $trg &

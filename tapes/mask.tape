@@ -19,7 +19,7 @@ task mask : sockeye_scripts tools
   :: masking_add_index=@
   :: masking_dict_files=@
   :: masking_pattern_files=@
-  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu {
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu .pyenv=$pyenv {
 
   # This always masks in parallel, but note that this is used
   # only for train and dev, since test is recomputed via the packaged
