@@ -19,6 +19,7 @@ task mask : sockeye_scripts tools
   :: masking_add_index=@
   :: masking_dict_files=@
   :: masking_pattern_files=@
+  :: masking_prob=@
   :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu .pyenv=$pyenv {
 
   # This always masks in parallel, but note that this is used
@@ -26,7 +27,7 @@ task mask : sockeye_scripts tools
   # model. For dev, we mask in parallel since validation scores work
   # on the raw data anyway.
 
-  cmd="python3 $sockeye_scripts/masking/mask_terms.py"
+  cmd="python3 $sockeye_scripts/masking/mask_terms.py --prob $masking_prob"
   if [[ $masking_pattern_files != "/dev/null" ]]; then
     cp $masking_pattern_files .
     cmd+=" --pattern-files $masking_pattern_files"
