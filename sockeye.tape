@@ -10,6 +10,9 @@ import "tapes/download.tape"
 # perform masking on reserved symbols to improve consistency 
 import "tapes/mask.tape"
 
+# perform masking on reserved symbols to improve consistency 
+import "tapes/fast_align.tape"
+
 # tasks related to tokenize
 import "tapes/tokenize.tape"
 
