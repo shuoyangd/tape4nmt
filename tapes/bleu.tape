@@ -1,6 +1,6 @@
 task multi_bleu : mosesdecoder
-    < in=$detokenized_output
-    < ref=$tokenized_data_trg[DataSection:test]
+    < in=$out@decode_with_bundle
+    < ref=$raw_data_test_trg
     > bleu
     > bleu_c
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags {

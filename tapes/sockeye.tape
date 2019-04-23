@@ -1,3 +1,45 @@
+import "packages.tape"
+import "submitters.tape"
+import "versioners.tape"
+
+# ==== pipeline starts here ====
+
+# download all the data to the local directory
+import "download.tape"
+
+# perform masking on reserved symbols to improve consistency 
+import "mask.tape"
+
+# perform masking on reserved symbols to improve consistency 
+import "fast_align.tape"
+
+# tasks related to tokenize
+import "tokenize.tape"
+
+# tasks related to casing
+import "recase.tape"
+
+# tasks related to subword processing
+import "subword.tape"
+
+# tasks related to subword processing
+import "source_factors.tape"
+
+# currently support nist_bleu and multi_bleu
+# sacrebleu to be supported
+import "bleu.tape"
+
+# ==== pipeline ends here ====
+
+# Nuts and bolts:
+global {
+  ducttape_experimental_packages=true
+  ducttape_experimental_submitters=true
+  ducttape_experimental_imports=true
+  ducttape_experimental_multiproc=true
+}
+
+
 task prepare_data : sockeye
     < train_src_in=$prepared_data_src[DataSection:train]
     < train_trg_in=$prepared_data_trg[DataSection:train]
@@ -123,11 +165,15 @@ task train : sockeye
 
 # Takes all the data and builds a packaged model directory.
 # Ideally this should be used for evaluation.
-task package_model : sockeye mosesdecoder sockeye_scripts
+task package_model : sockeye mosesdecoder sockeye_scripts fast_align
   < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
   < casing_model=(Casing: actual="/dev/null" lower_source="/dev/null" true=$out@train_truecaser)
   < model=$model@train
   < observed_masks=(DoMasking: no="/dev/null" yes=$masks@mask[DataSection:train])
+  < forward_log=(MaskIndex: yes="/dev/null" no=$forward_log@fast_align)
+  < reverse_log=(MaskIndex: yes="/dev/null" no=$reverse_log@fast_align)
+  < forward_lexicon=(MaskIndex: yes="/dev/null" no=$forward_lexicon@fast_align)
+  < reverse_lexicon=(MaskIndex: yes="/dev/null" no=$reverse_lexicon@fast_align)
   > bundle="bundle"
   :: casing=(Casing: actual true lower_source)
   :: tokenize=(DoTokenize: yes="yes" no="no")
@@ -216,7 +262,7 @@ EOF
     prepare_subword_arg="--subword-type $subword_method --subword-model \$rundir/subword.model"
 
     if [[ $mask == "yes" && $subword_method == "bpe" ]]; then
-      prepare_subword_arg+=" --subword-glossary $(cat $observed_masks | perl -pe 's/\n/ /g')"
+      prepare_subword_arg+=" --subword-glossary '__[A-Zz-z0-9]+(_\d+)?__'"
     fi
   fi
 
@@ -235,7 +281,20 @@ EOF
   fi
 
   if [[ $mask == "yes" ]]; then
-    post_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json --unmask"
+    if [[ $forward_log != "/dev/null" ]]; then
+      # As a temporary hack, handle this in decode_with_bundle
+      # # Run fast_align to line up the masks
+      # python3 ${fast_align}/src/force_align.py $forward_lexicon $forward_log $reverse_lexicon $reverse_log grow-diag-final-and
+
+      # ${fast_align}/src/force_align.py 
+
+      # # Align without indices
+      # post_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json --unmask --fast-align
+      post_cmd+=""
+    else
+      # Align using the indices
+      post_cmd+=" | python \$rundir/sockeye_scripts/masking/mask_terms.py --json --unmask"
+    fi
   fi
 
   echo $pre_cmd >> pre.sh
@@ -262,6 +321,12 @@ task decode_with_bundle : sockeye tools
     < bundled_model=$bundle@package_model
     > out="out"
     > log="out.log"
+    < forward_log=(MaskIndex: yes="/dev/null" no=$forward_log@fast_align)
+    < reverse_log=(MaskIndex: yes="/dev/null" no=$reverse_log@fast_align)
+    < forward_lexicon=(MaskIndex: yes="/dev/null" no=$forward_lexicon@fast_align)
+    < reverse_lexicon=(MaskIndex: yes="/dev/null" no=$reverse_lexicon@fast_align)
+    :: do_masking=(DoMasking: no="no" yes="yes")
+    :: masking_add_index=@
     :: num_devices=@
     :: test_max_sent_length=@
     :: test_beam_size=@
@@ -288,52 +353,10 @@ task decode_with_bundle : sockeye tools
     --batch-size $test_batch_size \
     --max-input-len $test_max_sent_length \
     | tee ${out}.json | jq -r .text > $out 2> $log
-}
 
-# the target input here is used to compute naïve and ppl,
-# that's why we need post-bpe target input
-task decode : sockeye tools
-    < in=$prepared_data_src[DataSection:test]
-    < model=$model@train
-    < factor_files=(SourceFactors: no="/dev/null" yes=$factor_files@compute_source_factors[DataSection:test])
-    > out="out"
-    > log="out.log"
-    > scores="out.scores"
-    :: num_devices=@
-    :: test_max_sent_length=@
-    :: test_beam_size=@
-    :: test_batch_size=@
-    :: use_cpu=@
-    :: .submitter=$submitter
-    :: .action_flags=@
-    :: .resource_flags=$resource_flags_decode
-    :: pyenv=@ {
-
-  if [[ $use_cpu == "yes" ]]; then
-    device_flag="--use-cpu"
-  else
-    device_flag="--device-ids -$num_devices"
-  fi
-
-  factor_flag=""
-  if [[ $factor_files != "/dev/null" ]]; then
-    factor_flag="--input-factors $(cat $factor_files)"
-  fi
-
-  export PYTHONPATH=${sockeye}
-
-  python3 -m sockeye.translate \
-    -m $model \
-    $device_flag \
-    --disable-device-locking \
-    -i $in \
-    $factor_flag \
-    -o out.all \
-    --output-type translation_with_score \
-    --beam-size $test_beam_size \
-    --batch-size $test_batch_size \
-    --max-input-len $test_max_sent_length \
-
-    cat out.all | $tools/bin/unpaste $scores $out
-    mv out.all.log $log
+  # TEMPORARY HACK
+   if [[ $do_masking == "yes" && $masking_add_index == "no" ]]; then
+     cat corpus | python3 ${fast_align}/src/force_align.py $forward_lexicon $forward_log $reverse_lexicon $reverse_log grow-diag-final-and > alignments
+     cat ${out}.json | python3 ${sockeye_scripts}/masking/replace_masks.py -a alignments > t
+   fi
 }
