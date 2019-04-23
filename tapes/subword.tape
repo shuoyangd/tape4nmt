@@ -18,8 +18,7 @@ task train_bpe : subword_nmt
   :: bpe_operations=@
   :: SRC=@
   :: TRG=@
-  :: pyenv=@
-  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16g .pyenv=$pyenv {
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16g {
 
   subword-nmt learn-joint-bpe-and-vocab -i $src_in $trg_in -s $bpe_operations -o $model --write-vocabulary bpe.vocab.$SRC bpe.vocab.$TRG -v 2> log
 }
@@ -32,12 +31,11 @@ task apply_bpe : subword_nmt
   > src
   > trg
   :: masking=(DoMasking: no yes)
-  :: pyenv=@
-  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu .pyenv=$pyenv {
+  :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags_16cpu {
 
   glossary_flag=""
   if [[ $observed_masks != "/dev/null" ]]; then
-    glossary_flag="--glossaries $(cat $observed_masks | perl -pe 's/\n/ /g')"
+    glossary_flag="--glossaries '__[A-Za-z0-9]+(_\d+)?__'"
   fi
 
   echo "GLOSSARY FLAG: $glossary_flag"
@@ -54,10 +52,9 @@ task train_sentencepiece : sentencepiece
   > vocab="sp.vocab"
   :: sentencepiece_vocab_size=@
   :: sentencepiece_model_type=@
-  :: pyenv=@
   :: .submitter=$submitter
   :: .resource_flags=$resource_flags_16cpu
-  :: .action_flags=@ .pyenv=$pyenv {
+  :: .action_flags=@ {
 
   glossary_flag=""
   if [[ $observed_masks != "/dev/null" ]]; then
@@ -73,8 +70,7 @@ task apply_sentencepiece : sentencepiece
   < model=$model@train_sentencepiece
   > src
   > trg
-  :: sentencepiece_alpha=@
-  :: pyenv=@ .pyenv=$pyenv {
+  :: sentencepiece_alpha=@ {
 
   cat $src_in | ${sentencepiece}/build/src/spm_encode --model $model --output_format sample_piece --alpha $sentencepiece_alpha > $src &
   cat $trg_in | ${sentencepiece}/build/src/spm_encode --model $model --output_format sample_piece --alpha $sentencepiece_alpha > $trg &
