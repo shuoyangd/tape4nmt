@@ -1,5 +1,5 @@
 task multi_bleu : mosesdecoder
-    < in=$out@decode_with_bundle
+    < in=$out@decode
     < ref=$raw_data_test_trg
     > bleu
     > bleu_c
@@ -19,7 +19,7 @@ task multi_bleu : mosesdecoder
 }
 
 task sacrebleu : sacrebleu
-    < sys_in=$out@decode_with_bundle
+    < sys_in=$out@decode
     < ref_in=$raw_data_test_trg
     > bleu
     > signature

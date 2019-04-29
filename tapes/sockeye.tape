@@ -10,7 +10,7 @@ import "download.tape"
 # perform masking on reserved symbols to improve consistency 
 import "mask.tape"
 
-# perform masking on reserved symbols to improve consistency 
+# fast align for unmasking
 import "fast_align.tape"
 
 # tasks related to tokenize
@@ -25,8 +25,7 @@ import "subword.tape"
 # tasks related to subword processing
 import "source_factors.tape"
 
-# currently support nist_bleu and multi_bleu
-# sacrebleu to be supported
+# sacrebleu
 import "bleu.tape"
 
 # ==== pipeline ends here ====
@@ -73,7 +72,7 @@ task prepare_data : sockeye
       --output data
 }
 
-task train : sockeye
+task sockeye_train : sockeye
     < prepared_data=$data@prepare_data
     < dev_src=$prepared_data_src[DataSection:dev]
     < dev_trg=$prepared_data_trg[DataSection:dev]
@@ -165,10 +164,10 @@ task train : sockeye
 
 # Takes all the data and builds a packaged model directory.
 # Ideally this should be used for evaluation.
-task package_model : sockeye mosesdecoder sockeye_scripts fast_align
+task sockeye_package_model : sockeye mosesdecoder sockeye_scripts fast_align
   < subword_model=(SubwordMethod: sentencepiece=$model@train_sentencepiece bpe=$model@train_bpe none="/dev/null")
   < casing_model=(Casing: actual="/dev/null" lower_source="/dev/null" true=$out@train_truecaser)
-  < model=$model@train
+  < model=$model@sockeye_train
   < observed_masks=(DoMasking: no="/dev/null" yes=$masks@mask[DataSection:train])
   < forward_log=(MaskIndex: yes="/dev/null" no=$forward_log@fast_align)
   < reverse_log=(MaskIndex: yes="/dev/null" no=$reverse_log@fast_align)
@@ -316,7 +315,7 @@ EOF
   chmod 755 pre.sh post.sh translate.sh
 }
 
-task decode_with_bundle : sockeye tools
+task sockeye_decode : sockeye tools
     < in=$raw_data_test_src
     < bundled_model=$bundle@package_model
     > out="out"

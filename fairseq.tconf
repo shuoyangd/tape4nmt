@@ -1,6 +1,7 @@
-import "confs/data.tconf"
-import "confs/pipeline.tconf"
-import "confs/fairseq.tconf"
+import "confs/wmt18-de-en.tconf"
+# import "confs/wmt18-en-de.tconf"
+# import "confs/wmt18-ru-en.tconf"
+# import "confs/wmt18-en-ru.tconf"
 
 global {
   ##################################################################################################
@@ -11,20 +12,68 @@ global {
   ducttape_output="out"
 
   ##################################################################################################
+  # Training options
+  ##################################################################################################
+
+  # all default is consistent with nematus
+  train_train_from="" # if there is a previous model to start with
+  train_train_from_state_dict="" # if there is a previous dict to start with
+  train_start_epoch="" # if trained for certain amount of epochs previously
+
+  train_batch_size="80"
+  train_optim="adam"
+  train_dropout=(Dropout: 0.1 0.3 0.5)
+  train_lr="0.001"
+  # train_lr_min="1e-8"
+  train_lr_min=""
+  train_lr_shrink="0.5"
+  # train_lr_scheduler="inverse_sqrt"
+  # train_warmup_init_lr="1e-07"
+  # train_warmup_updates="4000"
+  # train_criterion="label_smoothed_cross_entropy"
+  # train_label_smoothing="0.1"
+  train_lr_scheduler=""
+  train_warmup_init_lr=""
+  train_warmup_updates=""
+  train_criterion=""
+  train_label_smoothing=""
+  train_clip_norm=(ClipNorm: 0.0 0.1 0.5 1 5)
+  train_max_tokens="4000"
+  train_arch=(Architecture: transformer="transformer" conf="fconv" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en")
+  train_share_input_output_embed=""
+  train_skip_invalid_size_inputs_valid_test="yes"
+  train_adam_beta1="0.9"
+  train_adam_beta2="0.999"
+
+  # TEST CONFIGURATIONS
+  test_model_selection_strategy="acc"
+  test_max_sent_length="300"
+  test_beam_size="12"
+  test_batch_size="32"
+  test_replace_unk="True"
+  test_remove_bpe=""
+
+  # EVALUATION
+  sacrebleu_args=""
+
+  ##################################################################################################
   # Job parameters
   ##################################################################################################
 
   # SGE: generic job flags
-  resource_flags="-l mem_free=2g"
+  resource_flags="-l mem_free=2g,h_rt=12:00:00"
 
   # SGE: larger job flags
-  resource_flags_16g="-l mem_free=16g"
+  resource_flags_16g="-l mem_free=16g,h_rt=12:00:00"
+
+  # SGE: larger job flags
+  resource_flags_16cpu="-l mem_free=16g,num_proc=16,h_rt=12:00:00"
 
   # SGE: flags for training a model
-  resource_flags_train="-q g.q -l gpu=1,mem_free=4g"
+  resource_flags_train="-q gpu.q@@2080 -l gpu=1,mem_free=4g,h_rt=12:00:00"
 
   # SGE: flags for decoding
-  resource_flags_decode="-q g.q -l gpu=1,mem_free=4g"
+  resource_flags_decode="-q gpu.q -l gpu=1,mem_free=4g,h_rt=4:00:00"
 
   # SGE: flags for notifying about job completion (put in your email address!)
   action_flags="-m ae -M YOUR_EMAIL_HERE"
@@ -36,7 +85,7 @@ global {
   # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
   # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
   # the path to the script that should be loaded.
-  pyenv=(TestMode: no="conda:sockeye" yes="conda:sockeye-cpu")
+  pyenv="conda:sockeye"
 
   ##################################################################################################
   # Preprocessing options
@@ -45,22 +94,33 @@ global {
   # sentencepiece options
   sentencepiece_vocab_size=8000
   sentencepiece_model_type="unigram"
+  sentencepiece_alpha=0.5
 
   # no of BPE operations
-  bpe_operations=(BpeMergeOps: 49500 9500)
+  bpe_operations=32000
 
   # options for cleaning training data
-  MaxLen=80
-  Ratio=1
+  train_maxlen=100
+  train_clean_ratio=1
+
+  # MASKING
+  masking_add_index=(MaskIndex: yes no)
+  masking_pattern_files="/home/hltcoe/mpost/code/tape4nmt/patterns.txt"
+  masking_dict_files="/dev/null"
+  masking_prob=1.0
 
   use_cpu=(TestMode: no yes)
 }
 
 plan test {
-  reach sacrebleu, multi_bleu via (SgmDev: yes) * (SgmTest: yes) * (MergeTest: yes) * 
-    (UseExistingTruecaser: no) * (TrainSampleSize: DontSample) * (DoTokenize: yes) * 
-    (DoTruecase: yes) * (SubwordMethod: bpe) * (TrainDataSource: iwslt_deen_2014) * 
-    (DevDataSource: iwslt_deen_dev2010 iwslt_deen_dev2012) * 
-    (TestDataSource: iwslt_deen_test2010 iwslt_deen_test2011 iwslt_deen_test2012) * 
-    (Architecture: fconv_iwslt_de_en) * (ClipNorm: 0.1) * (Dropout: 0.1) * (BpeMergeOps: 49500)
+  reach sacrebleu via 
+    (DoTokenize: yes) * (SubwordMethod: *) * (TestMode: yes)
+}
+
+plan transformer {
+  reach sacrebleu via
+    (SubwordMethod: bpe) * (DoTokenize: yes) * (Casing: actual)
+
+  reach sacrebleu via
+    (SubwordMethod: sentencepiece) * (DoTokenize: no)
 }
