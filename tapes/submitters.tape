@@ -10,7 +10,7 @@ submitter shell :: COMMANDS TASK_VARIABLES {
       if [[ $virtualenv == conda:* ]]; then
         . /opt/anaconda3/etc/profile.d/conda.sh
         target=$(echo $virtualenv | cut -d: -f2-)
-        source deactivate
+        conda deactivate
         conda activate $target
       else
         source $virtualenv
