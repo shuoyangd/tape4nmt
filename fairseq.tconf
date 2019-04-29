@@ -22,28 +22,24 @@ global {
 
   train_batch_size="80"
   train_optim="adam"
-  train_dropout=(Dropout: 0.1 0.3 0.5)
-  train_lr="0.001"
-  # train_lr_min="1e-8"
-  train_lr_min=""
+  train_dropout="0.3"
+  # Increase for bigger batches (e.g., to 0.001 with --update-freq 16)
+  train_lr="0.0005"
+  train_lr_min="1e-09"
   train_lr_shrink="0.5"
-  # train_lr_scheduler="inverse_sqrt"
-  # train_warmup_init_lr="1e-07"
-  # train_warmup_updates="4000"
-  # train_criterion="label_smoothed_cross_entropy"
-  # train_label_smoothing="0.1"
-  train_lr_scheduler=""
-  train_warmup_init_lr=""
-  train_warmup_updates=""
-  train_criterion=""
-  train_label_smoothing=""
+  train_lr_scheduler="inverse_sqrt"
+  train_weight_decay="0.0"
+  train_warmup_init_lr="1e-07"
+  train_warmup_updates="4000"
+  train_criterion="label_smoothed_cross_entropy"
+  train_label_smoothing="0.1"
   train_clip_norm=(ClipNorm: 0.0 0.1 0.5 1 5)
   train_max_tokens="4000"
   train_arch=(Architecture: transformer="transformer" conf="fconv" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en")
-  train_share_input_output_embed=""
+  train_share_input_output_embed="--share-all-embeddings"
   train_skip_invalid_size_inputs_valid_test="yes"
   train_adam_beta1="0.9"
-  train_adam_beta2="0.999"
+  train_adam_beta2="0.98"
 
   # TEST CONFIGURATIONS
   test_model_selection_strategy="acc"

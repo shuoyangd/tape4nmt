@@ -71,6 +71,7 @@ task fairseq_train : fairseq
     < in=$out@binarize_data
     > out
     :: pyenv=@
+    :: train_arch=@
     :: train_batch_size=@
     :: train_optim=@
     :: train_dropout=@
@@ -87,7 +88,6 @@ task fairseq_train : fairseq
     :: train_clip_norm=@
     :: train_max_tokens=@
     # :: train_encoder_type=@
-    :: train_arch=@
     :: train_share_input_output_embed=@
     :: train_skip_invalid_size_inputs_valid_test=@
     :: .submitter=sge
@@ -109,11 +109,11 @@ task fairseq_train : fairseq
     cmd=$cmd" --lr-shrink $train_lr_shrink"
   fi
 
-  if [ ! -z $train_lr_scheduler ] ; then
+  if [[ ! -z $train_lr_scheduler ]] ; then
     cmd=$cmd" --lr-scheduler $train_lr_scheduler"
   fi
 
-  if [ ! -z $train_warmup_init_lr ] ; then
+  if [[ ! -z $train_warmup_init_lr ]] ; then
     cmd=$cmd" --warmup-init-lr $train_warmup_init_lr"
   fi
 
@@ -133,12 +133,16 @@ task fairseq_train : fairseq
     cmd=$cmd" --max-tokens $train_max_tokens"
   fi
 
-  if [ ! -z $train_adam_beta1 ] && [ ! -z $train_adam_beta2 ] ; then
-    cmd=$cmd" --adam-betas '($train_adam_beta1, $train_adam_beta2)'"
+  if [[ ! -z $train_adam_beta1 ]] && [[ ! -z $train_adam_beta2 ]] ; then
+    cmd+=" --adam-betas '($train_adam_beta1, $train_adam_beta2)'"
   fi
 
-  if [ ! -z $train_share_input_output_embed ] ; then
-    cmd=$cmd" --share-input-output-embed"
+  if [[ ! -z $train_share_input_output_embed ]] ; then
+    cmd+=" $train_share_input_output_embed"
+  fi
+
+  if [[ ! -z $train_weight_decay ]] ; then
+    cmd+=" --weight-dcay $train_weight_decay"
   fi
 
   if [ ! -z $train_skip_invalid_size_inputs_valid_test ] ; then
