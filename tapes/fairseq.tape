@@ -50,10 +50,14 @@ task train : fairseq
    :: train_warmup_init_lr=@
    :: train_warmup_updates=@
    :: train_criterion=@
+   :: train_rejection_option=@
+   :: train_rejection_option_margin=@
+   :: train_rejection_option_burn_in=@
    :: train_label_smoothing=@
    :: train_clip_norm=@
    :: train_max_tokens=@
    :: train_max_epochs=@
+   :: train_keep_last_epochs=@
    :: train_weight_decay=@
    :: train_update_freq=@
    :: train_seed=@
@@ -112,6 +116,10 @@ task train : fairseq
    cmd=$cmd" --criterion $train_criterion"
   fi
 
+  if [ ! -z $train_rejection_option ] ; then
+    cmd=$cmd" --rejection-option --rejection-margin $train_rejection_option_margin --rejection-burn-in-updates $train_rejection_option_burn_in"
+  fi
+
   if [ ! -z $train_label_smoothing ] ; then
    cmd=$cmd" --label-smoothing $train_label_smoothing"
   fi
@@ -122,6 +130,10 @@ task train : fairseq
 
   if [ ! -z $train_max_epochs ] ; then
   cmd=$cmd" --max-epoch $train_max_epochs"
+  fi
+
+  if [ ! -z $train_keep_last_epochs ] ; then
+   cmd=$cmd" --keep-last-epochs $train_keep_last_epochs"
   fi
 
   if [ ! -z $train_weight_decay ] ; then
