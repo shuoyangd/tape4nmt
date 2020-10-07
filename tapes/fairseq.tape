@@ -92,7 +92,7 @@ task train : fairseq
    cmd=$cmd" --min-lr $train_lr_min"
   fi
 
-  if [ ! -z $train_lr_shrink ] ; then
+  if [ ! -z $train_lr_shrink ] && [ "$train_lr_scheduler" != "inverse_sqrt" ] ; then
    cmd=$cmd" --lr-shrink $train_lr_shrink"
   fi
 
