@@ -54,6 +54,7 @@ task train : fairseq
    :: train_clip_norm=@
    :: train_max_tokens=@
    :: train_max_epochs=@
+   :: train_keep_last_epochs=@
    :: train_weight_decay=@
    :: train_update_freq=@
    :: train_seed=@
@@ -122,6 +123,10 @@ task train : fairseq
 
   if [ ! -z $train_max_epochs ] ; then
   cmd=$cmd" --max-epoch $train_max_epochs"
+  fi
+
+  if [ ! -z $train_keep_last_epochs ] ; then
+   cmd=$cmd" --keep-last-epochs $train_keep_last_epochs"
   fi
 
   if [ ! -z $train_weight_decay ] ; then

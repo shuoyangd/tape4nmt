@@ -21,7 +21,7 @@ package tools
 
 # using my fork for now, as fairseq evolves pretty fast
 package fairseq
-    :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=HEAD {
+    :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=dev090 {
 
   python setup.py build develop
 }
@@ -100,8 +100,9 @@ global {
   train_label_smoothing=(LabelSmoothing: Default="" Transformer="0.1")
   train_clip_norm=(ClipNorm: 0.0 0.1 0.5 1 5)
   train_max_tokens="4000"
-  train_max_epochs="100"
-  train_weight_decay=(WeightDecay: Default="" Transformer="0.0")
+  train_max_epochs="50"
+  train_keep_last_epochs="8"
+  train_weight_decay=(WeightDecay: Default="" Transformer="0.0001")
   train_update_freq=(UpdateFreq: Default="" Transformer="16")
   train_seed="2"
   train_arch=(Architecture: conv="fconv" transformer="transformer" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en" transformer_wmt_en_de="transformer_wmt_en_de" fconv_wmt_en_de="fconv_wmt_en_de" lstm_wiseman_iwslt_de_en="lstm_wiseman_iwslt_de_en")
