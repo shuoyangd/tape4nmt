@@ -50,12 +50,12 @@ Now it's up to the machine to do the heavy-lifting. Time for a coffee!
 
 ### Get Result
 
-When the pipeline finishes running, the result of your system build should reside in `multi_bleu/Architecture.fconv_iwslt_de_en+ClipNorm.0.1+MergeTest.yes+SgmDev.yes+SgmTest.yes+SubwordMethod.bpe+UseExistingTruecaser.no`. Here is what I got:
+When the pipeline finishes running, the result of your system build should reside in `multi_bleu/A44E370C238C2174FAB258249B03505A`. Here is what I got:
 
 ```
 > cat bleu bleu_c
-BLEU = 29.58, 64.3/37.7/23.9/15.4 (BP=0.963, ratio=0.964, hyp_len=84376, ref_len=87550)
-BLEU = 28.86, 63.2/36.8/23.3/14.9 (BP=0.963, ratio=0.964, hyp_len=84376, ref_len=87550)
+BLEU = 33.65, 66.8/41.1/27.2/18.2 (BP=0.986, ratio=0.986, hyp_len=86338, ref_len=87550)
+BLEU = 32.87, 65.7/40.2/26.5/17.7 (BP=0.986, ratio=0.986, hyp_len=86338, ref_len=87550)
 ```
 
 There is randomness here and there, but you should get roughtly the same result (<1 BLEU point difference).
@@ -64,6 +64,6 @@ There is randomness here and there, but you should get roughtly the same result 
 
 Here is a list of files and contents you need to check/modify for your future experiments:
 
-+ `TOOLKIT.tape`: experiment plan 
++ `TOOLKIT.tape`: experiment plan
 + `TOOLKIT.tconf`: system-related configurations and toolkit-dependent parameters
 + `confs/data.tconf`: data locations
