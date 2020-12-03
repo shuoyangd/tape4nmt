@@ -2,6 +2,8 @@
 # TASK, REALIZATION, CONFIGURATION: variables passed by ducttape
 submitter shell :: COMMANDS TASK_VARIABLES {
   action run {
+    echo $REALIZATION > branch_name
+
     set +u  # needed to fix a virtualenv bug
     if [[ ! -z ${pyenv:-} ]]; then
       virtualenv=$pyenv
@@ -33,6 +35,8 @@ submitter sge :: action_flags
               :: COMMANDS
               :: TASK REALIZATION TASK_VARIABLES CONFIGURATION {
   action run {
+    echo $REALIZATION > branch_name
+
     wrapper="ducttape_sge_job.sh"
     echo "#!/usr/bin/env bash" >> $wrapper
     echo "" >> $wrapper
