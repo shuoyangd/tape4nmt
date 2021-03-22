@@ -173,5 +173,8 @@ global {
   MaxLen=80
   Ratio=1
 
+  # flags for moses tokenizer
+  tokenizer_flags="-no-escape -a -q"
+
   use_cpu=(TestMode: no yes)
 }
