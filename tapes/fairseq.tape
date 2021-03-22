@@ -9,23 +9,15 @@ task binarize_data : fairseq
     :: SRC=@
     :: TRG=@
     :: .submitter=$submitter
-    :: .resource_flags="-l 'mem_free=16g,ram_free=16g'"
-    :: .action_flags="-m ae -M dings@jhu.edu" {
-
-  # . /export/home/sding/anaconda3/etc/profile.d/conda.sh  # start conda
-  if [ ! -z $pyenv ] ; then
-    # conda activate $pyenv
-    set +u
-    source $pyenv
-    set -u
-  fi
+    :: .resource_flags=$resource_flags_16g
+    :: .action_flags=$action_flags {
 
   ln -s $train_src_in train.$SRC
   ln -s $train_trg_in train.$TRG
   ln -s $dev_src_in dev.$SRC
   ln -s $dev_trg_in dev.$TRG
 
-  python $fairseq/preprocess.py --source-lang $SRC --target-lang $TRG \
+  PYTHONPATH=$fairseq fairseq-preprocess --source-lang $SRC --target-lang $TRG \
     --trainpref train --validpref dev \
     --destdir $out
 
@@ -34,7 +26,7 @@ task binarize_data : fairseq
   fi
 }
 
-task train : fairseq
+task train : fairseq tools
    < in=$out@binarize_data
    > out
    :: pyenv=@
@@ -63,26 +55,12 @@ task train : fairseq
    :: train_share_input_output_embed=@
    :: train_skip_invalid_size_inputs_valid_test=@
    :: .submitter=$submitter
-   :: .resource_flags="-l 'hostname=c*,gpu=1,mem_free=4g,ram_free=4g'"
-   :: .action_flags="-m bae -M dings@jhu.edu -q g.q" {
+   :: .resource_flags=$resource_flags_train
+   :: .action_flags=$action_flags {
 
   sleep `od -An -N1 -i /dev/random` # avoid GPU clash
 
-  # . /export/home/sding/anaconda3/etc/profile.d/conda.sh  # start conda
-  if [ ! -z $pyenv ] ; then
-   # conda activate $pyenv
-   set +u
-   source $pyenv
-   set -u
-  fi
-  export device=`free-gpu`
-  echo "gpu$device at "`hostname`
-  if [ -z $device ] ; then
-   echo "no device! grid cheaaaaaaaaaatin!"
-   exit;
-  fi
-
-  cmd="python $fairseq/train.py $in --save-dir $out"
+  cmd="fairseq-train $in --save-dir $out"
   cmd=$cmd" --lr $train_lr --clip-norm $train_clip_norm --dropout $train_dropout --max-tokens $train_max_tokens --arch $train_arch"
 
   if [ ! -z $train_optim ] ; then
@@ -154,19 +132,13 @@ task train : fairseq
   fi
 
   echo $cmd
-  CUDA_VISIBLE_DEVICES=`free-gpu` eval $cmd
-
-  # models=`ls ${out}_* 2>/dev/null`
-  # if [ ! -z "$models" ] ; then
-  #   touch $out # cheat
-  # fi
+  source $tools/get-gpu 1
+  PYTHONPATH=$fairseq $cmd
 }
 
 # the target input here is used to compute naïve acc and ppl,
 # that's why we need post-bpe target input
-task decode : fairseq
-    # < src_in=$out@apply_bpe[DataSection:devtest,DevtestDataSection:test,side:src]
-    # < trg_in=$out@apply_bpe[DataSection:devtest,DevtestDataSection:test,side:trg]
+task decode : fairseq tools
     < in=$out@dummy_aggregate_subword[DataSection:devtest,DevtestDataSection:test,side:src]
     < binarized_data_dir=$out@binarize_data
     < model=$out@train
@@ -174,43 +146,23 @@ task decode : fairseq
     :: test_max_sent_length=@
     :: test_beam_size=@
     :: test_batch_size=@
-    # :: test_replace_unk=@
     :: test_remove_bpe=@
     :: SRC=@
     :: TRG=@
     :: .submitter=$submitter
-    :: .action_flags="-m ae -M dings@jhu.edu -q g.q"
-    :: .resource_flags="-l 'hostname=c*,gpu=1,mem_free=4g,ram_free=4g'"
+    :: .resource_flags=$resource_flags_decode
+    :: .action_flags=$action_flags
     :: pyenv=@ {
 
-  # . /export/home/sding/anaconda3/etc/profile.d/conda.sh  # start conda
-  if [ ! -z $pyenv ] ; then
-    # conda activate $pyenv
-    set +u
-    source $pyenv
-    set -u
-  fi
-
-  # if [ $refn -eq 1 ]; then
-  #   cmd="python $fairseq/translate.py -gpu $device -model $model -src $src_in -tgt $trg_in -replace_unk -verbose -output $out -batch_size 1 -beam_size 12"
-    # cmd="python $fairseq/translate.py -gpu $device -model $model -src $src_in -verbose -output $out -batch_size $test_batch_size -beam_size $test_beam_size -max_sent_length $test_max_sent_length"
-  # else
-  #   cmd="python $fairseq/translate.py -gpu $device -model $model -src $src_in -tgt $trg_in0 -replace_unk -verbose -output $out -batch_size 1 -beam_size 12"
-    # cmd="python $fairseq/translate.py -gpu $device -model $model -src $src_in -verbose -output $out -batch_size $test_batch_size -beam_size $test_beam_size -max_sent_length $test_max_sent_length"
-  # fi
-
-  # if [ ! -z $test_replace_unk ]; then
-  #   cmd=$cmd" -replace_unk"
-  # fi
-
-  cmd="python $fairseq/interactive.py --path $model/checkpoint_best.pt $binarized_data_dir --beam $test_beam_size --source-lang $SRC --target-lang $TRG"
+  cmd="fairseq-interactive --path $model/checkpoint_best.pt $binarized_data_dir --beam $test_beam_size --source-lang $SRC --target-lang $TRG"
 
   if [ ! -z $test_remove_bpe ] ; then
     cmd=$cmd" --remove-bpe"
   fi
 
   echo $cmd
-  CUDA_VISIBLE_DEVICES=`free-gpu` $cmd < $in > decode.log
+  source $tools/get-gpu 1
+  PYTHONPATH=$fairseq $cmd < $in > decode.log
   cat decode.log | grep ^H | cut -f3- > $out
 }
 
