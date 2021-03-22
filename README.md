@@ -38,6 +38,4 @@ While we try our best to make the workflow intuitive and easy to use, it should 
 
 ### What if I want to contribute?
 
-If you think some of your changes are really general and other people should benefit from your changes as well, pull requests are always appreciated!
-
-The developers of this project are actively collaborating with [Tongfei Chen](https://github.com/ctongfei) to make [improvements for DuctTape](https://github.com/ctongfei/ducttape) to weed out issues we've identified. If you love this project and write Scala, consider joining our force on this separate effort!
+Pull requests are always appreciated!
