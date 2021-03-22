@@ -1,24 +1,31 @@
-func tokenize : mosesdecoder tools # stanford_seg
+func tokenize
     < in
     > out
+    :: tokenizer_flags
     :: Lang {
 
   # segmentation for chinese
   if [ $Lang == "zh" ] || [ $Lang == "chn" ] || [ $Lang == "cn" ] ; then
-
     mkdir -p $PWD/tmp
-    $stanford_seg/segmentstd.sh $stanford_seg/segment.sh $PWD/tmp ctb UTF-8 0 < $in | $mosesdecoder/scripts/tokenizer/escape-special-chars.perl | $tools/chinese-punctuations-utf8.perl > $out
+    cat $in | $stanford_seg/segmentstd.sh $stanford_seg/segment.sh $PWD/tmp ctb UTF-8 0 | $mosesdecoder/scripts/tokenizer/escape-special-chars.perl | $tools/chinese-punctuations-utf8.perl > $out
     rm -r $PWD/tmp
-
+  elif [ $Lang == "ro" ] ; then
+    cat $in | $mosesdecoder/scripts/tokenizer/replace-unicode-punctuation.perl \
+      | $mosesdecoder/scripts/tokenizer/normalize-punctuation.perl \
+      | $mosesdecoder/scripts/tokenizer/remove-non-printing-char.perl \
+      | $wmt16_scripts/preprocess/normalise-romanian.py \
+      | $wmt16_scripts/preprocess/remove-diacritics.py \
+      | $mosesdecoder/scripts/tokenizer/tokenizer.perl -l $Lang $tokenizer_flags > $out
   else
-    $mosesdecoder/scripts/tokenizer/normalize-punctuation.perl -l $Lang < $in | $mosesdecoder/scripts/tokenizer/tokenizer.perl -a -l $Lang -no-escape -q > $out
+    cat $in | $mosesdecoder/scripts/tokenizer/normalize-punctuation.perl -l $Lang | $mosesdecoder/scripts/tokenizer/tokenizer.perl -l $Lang $tokenizer_flags > $out
   fi
 }
 
-task tokenize calls tokenize : mosesdecoder tools # stanford_seg
+task tokenize calls tokenize : mosesdecoder tools wmt16_scripts # stanford_seg
     < in=$out@dummy_aggregate_merge
     > out
     :: Lang=(side: src=$SRC trg=$TRG)
+    :: tokenizer_flags=@
     :: .submitter=$submitter .action_flags=$action_flags .resource_flags=$resource_flags
 
 task characterize : tools
