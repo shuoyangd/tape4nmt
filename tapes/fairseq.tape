@@ -33,8 +33,6 @@ task train : fairseq tools
    :: train_batch_size=@
    :: train_optim=@
    :: train_dropout=@
-   :: train_adam_beta1=@
-   :: train_adam_beta2=@
    :: train_lr=@
    :: train_lr_min=@
    :: train_lr_shrink=@
@@ -50,7 +48,6 @@ task train : fairseq tools
    :: train_weight_decay=@
    :: train_update_freq=@
    :: train_seed=@
-   # :: train_encoder_type=@
    :: train_arch=@
    :: train_share_input_output_embed=@
    :: train_skip_invalid_size_inputs_valid_test=@
@@ -117,10 +114,6 @@ task train : fairseq tools
 
   if [ ! -z $train_seed ] ; then
   cmd=$cmd" --seed $train_seed"
-  fi
-
-  if [ ! -z $train_adam_beta1 ] && [ ! -z $train_adam_beta2 ] ; then
-   cmd=$cmd" --adam-betas '($train_adam_beta1, $train_adam_beta2)'"
   fi
 
   if [ ! -z $train_share_input_output_embed ] ; then

@@ -3,9 +3,10 @@
 ##################################################################################################
 
 package sockeye :: .versioner=git .repo="https://github.com/mjpost/sockeye" .ref=HEAD { }
-package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.2.12" { }
+package sacrebleu :: .versioner=pip .package="sacrebleu" .tag="1.5.0" { }
 package subword_nmt :: .versioner=pip .package="subword-nmt" .tag="0.3.5" { }
 package mosesdecoder :: .versioner=git .repo="https://github.com/moses-smt/mosesdecoder" .ref=HEAD { }
+package wmt16_scripts :: .versioner=git .repo="https://github.com/rsennrich/wmt16-scripts" .ref=HEAD { }
 
 package sentencepiece :: .versioner=git .repo="https://github.com/google/sentencepiece" .ref="tags/v0.1.5" {  # v0.1.6 throws segfault
   mkdir build
@@ -21,7 +22,7 @@ package tools
 
 # using my fork for now, as fairseq evolves pretty fast
 package fairseq
-    :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=dev090 {
+    :: .versioner=git .repo="https://github.com/shuoyangd/fairseq" .ref=dev0101 {
 
   python setup.py build develop
 }
@@ -108,13 +109,11 @@ global {
   train_arch=(Architecture: conv="fconv" transformer="transformer" fconv_iwslt_de_en="fconv_iwslt_de_en" transformer_iwslt_de_en="transformer_iwslt_de_en" transformer_wmt_en_de="transformer_wmt_en_de" fconv_wmt_en_de="fconv_wmt_en_de" lstm_wiseman_iwslt_de_en="lstm_wiseman_iwslt_de_en")
   train_share_input_output_embed=""
   train_skip_invalid_size_inputs_valid_test="yes"
-  train_adam_beta1="0.9"
-  train_adam_beta2="0.98"
 
   # TEST CONFIGURATIONS
   test_model_selection_strategy="acc"
   test_max_sent_length="300"
-  test_beam_size="5"
+  test_beam_size="12"
   test_batch_size="32"
   test_replace_unk="True"
   test_remove_bpe=""
